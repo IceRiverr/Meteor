@@ -3,6 +3,7 @@
 import os
 import sys
 import math
+import re
 
 import pymel.core as pmc
 import pymel.core.datatypes as pmdt
@@ -11,7 +12,6 @@ import pymel.core.datatypes as pmdt
 def strip_space_line(in_str):
 	return in_str.strip().replace("\n", "")
 
-	
 def str2float(in_str):
 	return float(strip_space_line(in_str))
 	
@@ -47,6 +47,7 @@ class BoneInfo(object):
 	
 bone_list = []
 bone_name_list = []
+bone_pivot_list = []
 	
 num_bones = 0
 num_dummey = 0
@@ -120,6 +121,7 @@ def read_bnc_file(file_path, bone_set):
 			bone_info.bone_pivotY = str2float(line_string[-2])
 			bone_info.bone_pivotZ = str2float(line_string[-1])
 			
+			
 			# bnc 中的四元数 格式为 wxyz 需要转为 xyzw
 			line = file.readline()
 			line_string = split_space(line)
@@ -141,6 +143,7 @@ def read_bnc_file(file_path, bone_set):
 				
 			bone_name_list.append(bone_info.bone_name)
 			bone_list.append(bone_info)
+			bone_pivot_list.append([bone_info.bone_pivotX, bone_info.bone_pivotY, bone_info.bone_pivotZ])
 			
 	file.close()
 	
@@ -187,17 +190,102 @@ def read_bnc_file(file_path, bone_set):
 		#pmc.connectJoint(bone.bone_name, bone.bone_parent, parentMode=True)
 		pmc.select(clear = True)
 		
+
+def parse_amb_value(line, num):
+	value_strs = re.split("=|,|\n|\r",strip_space_line(line))
+	value_arr = []
+	for n in range (0, num):
+		value_arr.append(float(value_strs[n - num]))
+	return value_arr
+	
+def read_amb_file(amb_path):
+	file = open(amb_path, "r")
+	
+	line = file.readline()
+	num_bones = parse_amb_value(file.readline(), 1)
+	num_dummey = parse_amb_value(file.readline(), 1)
+	num_frame = parse_amb_value(file.readline(), 1)
+	unknow = parse_amb_value(file.readline(), 1)
+	
+	while True:
+		line = file.readline()
+		if not line:
+			break;
+		
+		if line.find("frame start flag") != -1:
+			line = file.readline()
+			if line.find("frame index") != -1:
+				frame_index = int(line.split("=")[-1])
+				# base offset
+				vec_offset = parse_amb_value(file.readline(), 3)
+				bone_quat = []
+				dummey_vec_offset = []
+				dummey_quat = []
+				
+				# bone quat
+				for bi in range(0, 30):
+					quat = parse_amb_value(file.readline(), 4)
+					bone_quat.append(quat)
+				
+				# dummey info
+				for di in range(0, 6):
+					line = file.readline()
+					d_vec_offset = parse_amb_value(file.readline(), 3)
+					d_quat = parse_amb_value(file.readline(), 4)
+					dummey_vec_offset.append(d_vec_offset)
+					dummey_quat.append(d_quat)
+					
+				#print bone_list
+				for i in range(0, 36):
+					bone = bone_list[i]
+					if bone.bone_type == "bone":
+						b_quat = bone_quat[i]
+						rotateQuat = pmdt.Quaternion(b_quat[1], b_quat[2], b_quat[3], b_quat[0])
+						rotateEuler = rotateQuat.asEulerRotation()
+						maya_mat = rotateEuler.asMatrix()
+						
+						if bone.bone_name == "b":
+							maya_mat.a30 = vec_offset[0]
+							maya_mat.a31 = vec_offset[1]
+							maya_mat.a32 = vec_offset[2]
+						else:
+							maya_mat.a30 = bone.bone_pivotX
+							maya_mat.a31 = bone.bone_pivotY
+							maya_mat.a32 = bone.bone_pivotZ
+						
+						pmc.currentTime(int(frame_index))
+						pmc.select(bone.bone_name)
+						pmc.xform(matrix = maya_mat)
+						pmc.setKeyframe()
+					elif bone.bone_type == "Dummey":
+						d_vec_offset =  dummey_vec_offset[int(i - 30)]
+						d_quat = dummey_quat[int(i-30)]
+						
+						rotateQuat = pmdt.Quaternion(d_quat[1], d_quat[2], d_quat[3], d_quat[0])
+						rotateEuler = rotateQuat.asEulerRotation()
+						maya_mat = rotateEuler.asMatrix()
+						maya_mat.a30 = d_vec_offset[0]
+						maya_mat.a31 = d_vec_offset[1]
+						maya_mat.a32 = d_vec_offset[2]
+						
+						pmc.currentTime(int(frame_index))
+						pmc.select(bone.bone_name)
+						pmc.xform(matrix = maya_mat)
+						pmc.setKeyframe()
+					
+				print "Frame Index {0} succed".format(frame_index)
+				
 # main()	
 if __name__ == "__main__":
 	# read bnc
 	file_path = "D:\\Projects\\Meteor\\Maya\\assets\\P{0}.bnc".format(int(1))
 	bone_set = "_P{0}".format(p)
 	read_bnc_file(file_path, "")
-		
 	print "import bnc succed"
 	
 	# read amb
-	
+	amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\p0.amb.txt"
+	read_amb_file(amb_path)
 	
 	
 	
