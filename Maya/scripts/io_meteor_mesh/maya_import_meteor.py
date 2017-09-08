@@ -7,79 +7,6 @@ import math
 import pymel.core as pmc
 import pymel.core.datatypes as pmdt
 
-def quat2matrix(x, y, z, w):
-	matrix = [[0.0,0.0,0.0,0.0], [0.0,0.0,0.0,0.0], [0.0,0.0,0.0,0.0], [0.0,0.0,0.0,0.0]]
-	
-	xx = x * x
-	yy = y * y
-	zz = z * z
-	ww = w * w
-	xy = x * y
-	yz = y * z
-	zw = z * w
-	xw = x * w
-	yw = y * w
-	xz = x * z
-	
-	matrix[0][0] = 2 * (xx + ww) - 1
-	matrix[0][1] = 2 * (xy + zw)
-	matrix[0][2] = 2 * (xz - yw)
-	matrix[0][3] = 0
-	
-	matrix[1][0] = 2 * (xy - zw)
-	matrix[1][1] = 2 * (yy + ww) - 1
-	matrix[1][2] = 2 * (yz + xw)
-	matrix[1][3] = 0
-	
-	matrix[2][0] = 2 * (xz + yw)
-	matrix[2][1] = 2 * (yz - xw)
-	matrix[2][2] = 2 * (zz + ww) - 1
-	matrix[2][3] = 0
-	
-	matrix[3][0] = 0
-	matrix[3][1] = 0
-	matrix[3][2] = 0
-	matrix[3][3] = 1
-	
-	return matrix
-	
-	
-def quat2maya_matrix(x, y, z, w):
-	matrix = pmdt.Matrix()
-	
-	xx = x * x
-	yy = y * y
-	zz = z * z
-	ww = w * w
-	xy = x * y
-	yz = y * z
-	zw = z * w
-	xw = x * w
-	yw = y * w
-	xz = x * z
-	
-	matrix.a00 = 2.0 * (xx + ww) - 1.0
-	matrix.a01 = 2.0 * (xy + zw)
-	matrix.a02 = 2.0 * (xz - yw)
-	matrix.a03 = 0.0
-	
-	matrix.a10 = 2.0 * (xy - zw)
-	matrix.a11 = 2.0 * (yy + ww) - 1.0
-	matrix.a12 = 2.0 * (yz + xw)
-	matrix.a13 = 0.0
-	
-	matrix.a20 = 2.0 * (xz + yw)
-	matrix.a21 = 2.0 * (yz - xw)
-	matrix.a22 = 2.0 * (zz + ww) - 1.0
-	matrix.a23 = 0.0
-	
-	matrix.a30 = 0.0
-	matrix.a31 = 0.0
-	matrix.a32 = 0.0
-	matrix.a33 = 1.0
-	
-	return matrix
-	
 # 去除空格和换行符号
 def strip_space_line(in_str):
 	return in_str.strip().replace("\n", "")
@@ -118,14 +45,14 @@ class BoneInfo(object):
 	bone_quatW = 0
 	bone_child = 0
 	
-def read_bnc_fine(file_path, bone_set):
+bone_list = []
+bone_name_list = []
+	
+num_bones = 0
+num_dummey = 0
+
+def read_bnc_file(file_path, bone_set):
 	file = open(file_path, "r")
-	
-	bone_list = []
-	
-	num_bones = 0
-	num_dummey = 0
-	parent_bone = BoneInfo()
 	
 	while True:
 		line = file.readline()
@@ -211,74 +138,68 @@ def read_bnc_fine(file_path, bone_set):
 			line = file.readline()
 			if line.find("}") == -1:
 				print "ERROR"
-			
-			if(bone_info.bone_name == "d_base" + bone_set):
-				parent_bone = bone_info
-			else:
-				bone_list.append(bone_info)
 				
+			bone_name_list.append(bone_info.bone_name)
+			bone_list.append(bone_info)
+			
 	file.close()
 	
 	#create bone
 	
-	# parent group
-	group = pmc.group(em=True, name = parent_bone.bone_parent)
+	#print bone_name_list
+	for i in range(int(num_bones), int(num_bones + num_dummey)):
+		pre_leter = bone_list[i].bone_parent.split("_")[0][0]
+		parent_index = bone_list[i].bone_parent.split("_")[0][1:]
+		if pre_leter == "b":
+			bone_list[i].bone_parent = bone_name_list[int(float(parent_index))]
+		if pre_leter == "d":
+			bone_list[i].bone_parent = bone_name_list[int(float(parent_index) + num_bones)]
+			
+	group = pmc.group(em=True, n = "NULL" + bone_set)
 	pmc.rotate(0, -90.0, 0)
 	
-	new_joint = pmc.joint(a = True, p = (parent_bone.bone_pivotX, parent_bone.bone_pivotY, parent_bone.bone_pivotZ))
-	pmc.select(new_joint)
-	pmc.rename(new_joint, parent_bone.bone_name)
-	pmc.parent(new_joint, world = True)
-	new_joint.radius.set(0.25)
+	for bone in bone_list:
+		if bone.bone_type == "bone":
+			new_joint = pmc.joint(n = bone.bone_name)
+			pmc.parent(bone.bone_name, world=True)
+			radiusAttr = bone.bone_name + ".radius"
+			pmc.setAttr(radiusAttr, 0.5)
+		elif bone.bone_type == "Dummey":
+			new_dummey = pmc.group(em=True, n = bone.bone_name)
+			pmc.parent(new_dummey, world=True)
 	
-	rotateQuat = pmdt.Quaternion(parent_bone.bone_quatX, parent_bone.bone_quatY, parent_bone.bone_quatZ, parent_bone.bone_quatW)
-	rotateEuler = rotateQuat.asEulerRotation()
-	pmc.xform(a = True, ro = rotateEuler)
-	pmc.select(clear=True)
-	
-	pmc.parent(parent_bone.bone_name, parent_bone.bone_parent)
-	
-	for i in range(0, int(num_bones)):
-		new_bone = bone_list[i]
+	for bone in bone_list:
+		pmc.parent(bone.bone_name, bone.bone_parent)
 		
-		new_joint = pmc.joint()
-		pmc.select(new_joint)
-		pmc.rename(new_joint, new_bone.bone_name)
-		new_joint.radius.set(0.5)
+	for bone in bone_list:
+		pmc.select(bone.bone_name)
 		
-		pmc.parent(new_bone.bone_name, new_bone.bone_parent)
-		
-		#maya_mat1 = quat2maya_matrix(new_bone.bone_quatX, new_bone.bone_quatY, new_bone.bone_quatZ, new_bone.bone_quatW)
-		#maya_mat1.a30 = new_bone.bone_pivotX
-		#maya_mat1.a31 = new_bone.bone_pivotY
-		#maya_mat1.a32 = new_bone.bone_pivotZ
-		
-		rotateQuat = pmdt.Quaternion(new_bone.bone_quatX, new_bone.bone_quatY, new_bone.bone_quatZ, new_bone.bone_quatW)
+		rotateQuat = pmdt.Quaternion(bone.bone_quatX, bone.bone_quatY, bone.bone_quatZ, bone.bone_quatW)
 		rotateEuler = rotateQuat.asEulerRotation()
-		maya_mat2 = rotateEuler.asMatrix()
-		maya_mat2.a30 = new_bone.bone_pivotX
-		maya_mat2.a31 = new_bone.bone_pivotY
-		maya_mat2.a32 = new_bone.bone_pivotZ
+		maya_mat = rotateEuler.asMatrix()
+		maya_mat.a30 = bone.bone_pivotX
+		maya_mat.a31 = bone.bone_pivotY
+		maya_mat.a32 = bone.bone_pivotZ
 		
-		#print "\t{"
-		#print new_bone.bone_name
-		#print maya_mat1
-		#print maya_mat2
-		#print "\t}"
+		pmc.xform(matrix = maya_mat)
 		
-		pmc.xform(matrix = maya_mat2)
-		
-		pmc.parent(new_bone.bone_name, world=True)
-		pmc.connectJoint(new_bone.bone_name, new_bone.bone_parent, parentMode=True)
-		
+		#pmc.parent(bone.bone_name, world=True)
+		#pmc.connectJoint(bone.bone_name, bone.bone_parent, parentMode=True)
 		pmc.select(clear = True)
 		
 # main()	
 if __name__ == "__main__":
-	for p in range(0, 20):
-		file_path = "D:\\Projects\\Maya\\Meteor\\assets\\P{0}.bnc".format(int(p))
-		bone_set = "_P{0}".format(p) 
-		read_bnc_fine(file_path, bone_set)
+	# read bnc
+	file_path = "D:\\Projects\\Meteor\\Maya\\assets\\P{0}.bnc".format(int(1))
+	bone_set = "_P{0}".format(p)
+	read_bnc_file(file_path, "")
+		
+	print "import bnc succed"
+	
+	# read amb
+	
+	
+	
 	
 	
 	

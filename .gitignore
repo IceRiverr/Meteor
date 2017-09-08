@@ -13,14 +13,14 @@ Maya/renderData
 Maya/scenes
 Maya/sound
 Maya/sourceimages
+Maya/scripts/io_pdx_mesh-master/
 Maya/assets/workspace.mel
-
+Maya/workspace.mel
 
 Tools/Format/Data
 Tools/Format/Debug
 Tools/Format/Release
 *.db
-
 
 Unity/Assets/SampleScenes/
 Unity/Assets/Standard Assets/
@@ -31,8 +31,7 @@ Unity/Assets/Meteor/Scenes/
 Unity/Assets/Meteor/Meng/
 Unity/Assets/Meteor/Materials/
 Unity/Assets/Meteor/Bones/
-*.meta
 Unity/Assets/Meteor/Leg/
 Unity/Assets/Meteor/Prefabs/
-Maya/scripts/io_pdx_mesh-master/
-Maya/workspace.mel
+*.meta
+

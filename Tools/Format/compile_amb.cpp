@@ -81,12 +81,10 @@ void ansysAmb(const char* iInFileName, const char* iOutFileName){
    delete[] text;
 }
 int main(int argc, char** argv){
-    printf("======================================\n");
+	ansysAmb("Data/p0.amb", "Data/p0.amb.txt");
     ansysAmb("Data/p3.amb", "Data/p3.amb.txt");
-
-	printf("======================================\n");
 	ansysAmb("Data/character.amb", "Data/character.amb.txt");
-
+	
 	printf("Over\n");
     getchar();
     return 0;
