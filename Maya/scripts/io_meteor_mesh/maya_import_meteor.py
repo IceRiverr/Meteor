@@ -279,12 +279,13 @@ def read_amb_file(amb_path):
 if __name__ == "__main__":
 	# read bnc
 	file_path = "D:\\Projects\\Meteor\\Maya\\assets\\P{0}.bnc".format(int(1))
-	bone_set = "_P{0}".format(p)
+	#bone_set = "_P{0}".format(p)
 	read_bnc_file(file_path, "")
 	print "import bnc succed"
 	
 	# read amb
-	amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\p0.amb.txt"
+	#amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\p0.amb.txt"
+	amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\character.amb.txt"
 	read_amb_file(amb_path)
 	
 	

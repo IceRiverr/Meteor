@@ -1,0 +1,213 @@
+#注意使用项目文件
+
+import maya.cmds as mc
+mc.polySphere()
+
+http://help.autodesk.com/view/MAYAUL/2015/ENU/
+maya中文帮助文档
+
+http://help.autodesk.com/view/MAYAUL/2016/ENU/?guid=__py_ref_class_open_maya_1_1_m_fn_mesh_html
+注意这个笔记
+
+
+Ctrl + H 影藏物体
+
+Ctrl + D 复制物体
+
+G 重复上一个命令
+
+S 快速k帧
+
+
+按住Insert可以局部修改骨骼的位置
+
+骨架创建好后需要看方向
+
+
+刷骨骼笔刷时 ctrl 反选 shift 微调
+
+F8点模式--窗口--常规编辑器--组件编辑器--平滑蒙皮--选择点
+
+
+
+
+import maya.cmds as cmds
+
+# Non-planar faces
+cmds.polyPlane( n='plg1', sx=5, sy=5, w=5, h=5 )
+cmds.move( -6, 0, 0 )
+cmds.polyMoveVertex( 'plg1.vtx[7]', 'plg1.vtx[10]', 'plg1.vtx[25]', 'plg1.vtx[28]', ltz=1 )
+cmds.polyTriangulate( 'plg1.f[0:1]', 'plg1.f[5:6]', 'plg1.f[3:4]', 'plg1.f[8:9]', 'plg1.f[15:16]', 'plg1.f[20:21]', 'plg1.f[18:19]', 'plg1.f[23:24]' )
+
+# Holed faces
+maya.cmds.polyCreateFacet( p=[(2.5, 0, 2.5), (2.5, 0, -2.5), (-2.5, 0, -2.5), (-2.5, 0, 2.5), (), (1, 0, -1), (-1, 0, -1), (-1, 0, 1), (1, 0, 1)],  n='plg2' )
+cmds.polyTriangulate( 'plg2.f[0]' )
+
+# Both holed and non-planar facets
+cmds.polyPlane( n='plg3', sx=3, sy=3, h=5, w=5 )
+cmds.move( 6, 0, 0 )
+cmds.polyChipOff( 'plg3.f[4]', dup=1, ltz=1, ls=(.25, .25, .25) )
+cmds.polyMergeFacet( 'plg3', ch=True, ff=4, sf=9 )
+cmds.polyTriangulate( 'plg3.f[4]' )
+
+import pymel.core as pm
+pm.polyCreateFacet( p=[(0, 0, 0), (10, 0, 0), (10, 10, 0), (0, 10, 0)] )
+
+#add a new quadrangular facet with 2 triangular holes.
+pm.polyAppend( a=[1, (20, 0, 0), (20, 10, 0), (), (12, 6, 0), (14, 5, 0), (12, 4, 0), (), (16, 5, 0), (18, 6, 0), (18, 4, 0)] )
+
+# add a new face
+pm.polyAppendVertex( a=[6, 10, (.167, .3, -.167), (.167, .3, .167)] )
+
+Clausewitz Engine
+paradox引擎 源码
+
+http://www.moddb.com/engines/clausewitz-engine
+
+import maya.cmds as mc
+import pymel.core as pm
+
+download.autodesk.com/global/docs/maya2012/en_us/index.html
+
+import pymel.core as pm
+
+mc.autoKeyframe( state = True)
+mc.autoKeyframe()
+mc.select("Neck", r = True)
+mc.rotate(0, 0, "15", t = True)
+mc.currentTime(30)
+mc.select("upper_arm")
+mc.rotate(0,0,-15, r = True)
+
+import pymel.core.datatypes as dt
+rotateTest = dt.Quaternion(1.2, 2.0, 3.0, 1.0)
+rotateE = rotateTest.asEulerRotation()
+
+
+OpenMaya.MFnMesh Class Reference
+https://knowledge.autodesk.com/zh-hans/search-result/caas/CloudHelp/cloudhelp/2016/CHS/Maya-SDK/py-ref/class-open-maya-1-1-m-fn-mesh-html.html
+
+http://download.autodesk.com/us/maya/2010help/api/class_m_fn_mesh.html
+
+http://www.charactersetup.com/tutorial_skinWeights.html
+
+
+
+// 导入骨架
+import pymel.core as pmc
+import pymel.core.datatypes as pmdt
+new_bone = pmc.joint()
+pmc.select(new_bone)
+pmc.rename(new_bone, "base")
+pmc.parent(new_bone, world = True)
+
+q=((x,y,z)sinθ2, cosθ2) 
+
+
+沿着x轴旋转30度
+
+
+
+1.0, 0.0, 0.0, 
+
+identity = pmdt.Quaternion([0.0, 0.0, 0.0, 1.0])
+rot = pmdt.EulerRotation(0,0,0)
+pmc.xform(a = True, ro = rot)
+
+
+import math
+
+pmdt.Angle.setUIUnit("radians")
+
+rotateAxis = [1.0, 0.0, 0.0]
+rotateRad = math.radians(30)
+rotateQuat =  pmdt.Quaternion(rotateAxis[0] * math.sin(rotateRad), rotateAxis[1] * math.sin(rotateRad),rotateAxis[2] * math.sin(rotateRad * 0.5), math.cos(rotateRad * 0.5))
+rotateEuler = rotateQuat.asEulerRotation()
+pmc.xform(a = True, ro = rotateEuler)
+
+import math
+
+pmdt.Angle.setUIUnit("radians")
+
+rotateAxis = [1.0, 0.0, 0.0]
+rotateRad = math.radians(1)
+rotateQuat =  pmdt.Quaternion(rotateAxis[0] * math.sin(rotateRad), rotateAxis[1] * math.sin(rotateRad),rotateAxis[2] * math.sin(rotateRad * 0.5), math.cos(rotateRad * 0.5))
+rotateEuler = rotateQuat.asEulerRotation()
+pmc.xform(a = True, ro = rotateEuler)
+
+
+# 四元数测试代码
+import pymel.core.datatypes as pmdt
+
+cube = pmc.select("pCube1")
+rotateEuler = pmdt.EulerRotation(30, 30, 0)
+
+pmc.xform(a = True, ro =  rotateEuler)
+
+deg = 30 * 0.5
+rad = math.radians(deg)
+
+sin_a = math.sin(rad)
+cos_a = math.cos(rad)
+
+quat = pmdt.Quaternion(sin_a, 0, 0, cos_a);
+
+rot = quat.asEulerRotation()
+
+print rot
+
+rot[0] = math.degrees(rot[0])
+rot[1] = math.degrees(rot[1])
+rot[2] = math.degrees(rot[2])
+
+pmc.xform(a = True, ro = rot, )
+
+# ok通过
+
+pm.xform( r=True, ro=(0, 90, 0) )
+
+pmc.currentTime(0)
+pmc.select("pCube1")
+pmc.move( 1, 1, 1 )
+pmc.setKeyframe()
+
+pmc.currentTime(0)
+pmc.select("pPipe1")
+pmc.move( 8, 8, 1 )
+pmc.setKeyframe()
+
+pmc.currentTime(10)
+pmc.select("pCube1")
+pmc.move( 2, 2, 2 )
+pmc.setKeyframe()
+
+pmc.currentTime(10)
+pmc.select("pPipe1")
+pmc.move( 2, 3, 4 )
+pmc.setKeyframe()
+
+pmc.currentTime(20)
+pmc.select("pCube1")
+pmc.move( 2, 6, 1 )
+pmc.setKeyframe()
+
+pmc.currentTime(20)
+pmc.select("pPipe1")
+pmc.move( 12, 3, 4 )
+pmc.setKeyframe()
+
+pmc.currentTime(30)
+pmc.select("pCube1")
+pmc.xform( r=True, ro=(10, 15, 0) )
+pmc.setKeyframe()
+
+pmc.currentTime(30)
+pmc.select("pPipe1")
+pmc.move( 0, 3, 4 )
+pmc.xform( r=True, ro=(10, -30, 0) )
+pmc.setKeyframe()
+
+
+
+
+
