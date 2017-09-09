@@ -39,50 +39,12 @@ cmds.move( -6, 0, 0 )
 cmds.polyMoveVertex( 'plg1.vtx[7]', 'plg1.vtx[10]', 'plg1.vtx[25]', 'plg1.vtx[28]', ltz=1 )
 cmds.polyTriangulate( 'plg1.f[0:1]', 'plg1.f[5:6]', 'plg1.f[3:4]', 'plg1.f[8:9]', 'plg1.f[15:16]', 'plg1.f[20:21]', 'plg1.f[18:19]', 'plg1.f[23:24]' )
 
-# Holed faces
-maya.cmds.polyCreateFacet( p=[(2.5, 0, 2.5), (2.5, 0, -2.5), (-2.5, 0, -2.5), (-2.5, 0, 2.5), (), (1, 0, -1), (-1, 0, -1), (-1, 0, 1), (1, 0, 1)],  n='plg2' )
-cmds.polyTriangulate( 'plg2.f[0]' )
-
-# Both holed and non-planar facets
-cmds.polyPlane( n='plg3', sx=3, sy=3, h=5, w=5 )
-cmds.move( 6, 0, 0 )
-cmds.polyChipOff( 'plg3.f[4]', dup=1, ltz=1, ls=(.25, .25, .25) )
-cmds.polyMergeFacet( 'plg3', ch=True, ff=4, sf=9 )
-cmds.polyTriangulate( 'plg3.f[4]' )
-
-import pymel.core as pm
-pm.polyCreateFacet( p=[(0, 0, 0), (10, 0, 0), (10, 10, 0), (0, 10, 0)] )
-
-#add a new quadrangular facet with 2 triangular holes.
-pm.polyAppend( a=[1, (20, 0, 0), (20, 10, 0), (), (12, 6, 0), (14, 5, 0), (12, 4, 0), (), (16, 5, 0), (18, 6, 0), (18, 4, 0)] )
-
-# add a new face
-pm.polyAppendVertex( a=[6, 10, (.167, .3, -.167), (.167, .3, .167)] )
-
 Clausewitz Engine
 paradox引擎 源码
 
 http://www.moddb.com/engines/clausewitz-engine
 
-import maya.cmds as mc
-import pymel.core as pm
-
 download.autodesk.com/global/docs/maya2012/en_us/index.html
-
-import pymel.core as pm
-
-mc.autoKeyframe( state = True)
-mc.autoKeyframe()
-mc.select("Neck", r = True)
-mc.rotate(0, 0, "15", t = True)
-mc.currentTime(30)
-mc.select("upper_arm")
-mc.rotate(0,0,-15, r = True)
-
-import pymel.core.datatypes as dt
-rotateTest = dt.Quaternion(1.2, 2.0, 3.0, 1.0)
-rotateE = rotateTest.asEulerRotation()
-
 
 OpenMaya.MFnMesh Class Reference
 https://knowledge.autodesk.com/zh-hans/search-result/caas/CloudHelp/cloudhelp/2016/CHS/Maya-SDK/py-ref/class-open-maya-1-1-m-fn-mesh-html.html
@@ -90,7 +52,6 @@ https://knowledge.autodesk.com/zh-hans/search-result/caas/CloudHelp/cloudhelp/20
 http://download.autodesk.com/us/maya/2010help/api/class_m_fn_mesh.html
 
 http://www.charactersetup.com/tutorial_skinWeights.html
-
 
 
 // 导入骨架
@@ -103,69 +64,7 @@ pmc.parent(new_bone, world = True)
 
 q=((x,y,z)sinθ2, cosθ2) 
 
-
-沿着x轴旋转30度
-
-
-
-1.0, 0.0, 0.0, 
-
-identity = pmdt.Quaternion([0.0, 0.0, 0.0, 1.0])
-rot = pmdt.EulerRotation(0,0,0)
-pmc.xform(a = True, ro = rot)
-
-
-import math
-
-pmdt.Angle.setUIUnit("radians")
-
-rotateAxis = [1.0, 0.0, 0.0]
-rotateRad = math.radians(30)
-rotateQuat =  pmdt.Quaternion(rotateAxis[0] * math.sin(rotateRad), rotateAxis[1] * math.sin(rotateRad),rotateAxis[2] * math.sin(rotateRad * 0.5), math.cos(rotateRad * 0.5))
-rotateEuler = rotateQuat.asEulerRotation()
-pmc.xform(a = True, ro = rotateEuler)
-
-import math
-
-pmdt.Angle.setUIUnit("radians")
-
-rotateAxis = [1.0, 0.0, 0.0]
-rotateRad = math.radians(1)
-rotateQuat =  pmdt.Quaternion(rotateAxis[0] * math.sin(rotateRad), rotateAxis[1] * math.sin(rotateRad),rotateAxis[2] * math.sin(rotateRad * 0.5), math.cos(rotateRad * 0.5))
-rotateEuler = rotateQuat.asEulerRotation()
-pmc.xform(a = True, ro = rotateEuler)
-
-
-# 四元数测试代码
-import pymel.core.datatypes as pmdt
-
-cube = pmc.select("pCube1")
-rotateEuler = pmdt.EulerRotation(30, 30, 0)
-
-pmc.xform(a = True, ro =  rotateEuler)
-
-deg = 30 * 0.5
-rad = math.radians(deg)
-
-sin_a = math.sin(rad)
-cos_a = math.cos(rad)
-
-quat = pmdt.Quaternion(sin_a, 0, 0, cos_a);
-
-rot = quat.asEulerRotation()
-
-print rot
-
-rot[0] = math.degrees(rot[0])
-rot[1] = math.degrees(rot[1])
-rot[2] = math.degrees(rot[2])
-
-pmc.xform(a = True, ro = rot, )
-
-# ok通过
-
-pm.xform( r=True, ro=(0, 90, 0) )
-
+// 自动关键帧的工具
 pmc.currentTime(0)
 pmc.select("pCube1")
 pmc.move( 1, 1, 1 )
@@ -176,38 +75,104 @@ pmc.select("pPipe1")
 pmc.move( 8, 8, 1 )
 pmc.setKeyframe()
 
-pmc.currentTime(10)
-pmc.select("pCube1")
-pmc.move( 2, 2, 2 )
-pmc.setKeyframe()
+// 
+import 
 
-pmc.currentTime(10)
-pmc.select("pPipe1")
-pmc.move( 2, 3, 4 )
-pmc.setKeyframe()
+	import maya.OpenMaya as OpenMaya
+	# vertices
+    numVertices = 0
+    vertexArray = OpenMaya.MFloatPointArray()   # array of points
+    for i in xrange(0, len(verts), 3):
+        v = OpenMaya.MFloatPoint(verts[i], verts[i+1], verts[i+2])
+        vertexArray.append(v)
+        numVertices += 1
 
-pmc.currentTime(20)
-pmc.select("pCube1")
-pmc.move( 2, 6, 1 )
-pmc.setKeyframe()
+    # faces
+    numPolygons = len(tris) / 3
+    polygonCounts = OpenMaya.MIntArray()    # count of vertices per poly
+    for i in range(0, numPolygons):
+        polygonCounts.append(3)
+    # OpenMaya.MScriptUtil.createIntArrayFromList([3]*numPolygons, polygonCounts)
 
-pmc.currentTime(20)
-pmc.select("pPipe1")
-pmc.move( 12, 3, 4 )
-pmc.setKeyframe()
+    # vert connections
+    polygonConnects = OpenMaya.MIntArray()
+    for item in tris:
+        polygonConnects.append(item)
+    # OpenMaya.MScriptUtil.createIntArrayFromList(tris, polygonConnects)
 
-pmc.currentTime(30)
-pmc.select("pCube1")
-pmc.xform( r=True, ro=(10, 15, 0) )
-pmc.setKeyframe()
+    # default UVs
+    uArray = OpenMaya.MFloatArray()
+    vArray = OpenMaya.MFloatArray()
+    if uv_Ch.get(0):
+        uv_data = uv_Ch[0]
+        for i in xrange(0, len(uv_data), 2):
+            uArray.append(uv_data[i])
+            vArray.append(1 - uv_data[i+1])        # flip the UV coords in V!
 
-pmc.currentTime(30)
-pmc.select("pPipe1")
-pmc.move( 0, 3, 4 )
-pmc.xform( r=True, ro=(10, -30, 0) )
-pmc.setKeyframe()
+    """ ================================================================================================================
+        create the new mesh """
+    mFn_Mesh.create(numVertices, numPolygons, vertexArray, polygonCounts, polygonConnects, uArray, vArray, new_object)
+    mFn_Mesh.setName(tmp_mesh_name)
+    m_DagMod.doIt()     # sets up the transform parent to the mesh shape
+
+    # PyNode for the mesh
+    new_mesh = pmc.PyNode(tmp_mesh_name)
+    new_transform = pmc.listRelatives(new_mesh, type='transform', parent=True)[0]
+	
+	
+import maya.OpenMaya as OpenMaya
+
+numVertices = 3
+vertexArray = OpenMaya.MFloatPointArray()
+v = OpenMaya.MFloatPoint(0.0, 0.0, 0.0)
+vertexArray.append(v)
+v = OpenMaya.MFloatPoint(0.0, 1.0, 0.0)
+vertexArray.append(v)
+v = OpenMaya.MFloatPoint(1.0, 0.0, 0.0)
+vertexArray.append(v)
+
+numPolygons = 3
+polygonCounts = OpenMaya.MIntArray()
+polygonCounts.append(3)
+
+polygonConnects = OpenMaya.MIntArray()
+polygonConnects.append(0)
+polygonConnects.append(1)
+polygonConnects.append(2)
+
+uArray = OpenMaya.MFloatArray()
+vArray = OpenMaya.MFloatArray()
 
 
+uArray.append(0.0)
+uArray.append(0.0)
+uArray.append(1.0)
+
+vArray.append(1.0)
+vArray.append(0.0)
+vArray.append(1.0)
+
+tmp_mesh_name = "test_mesh"
+
+mFn_Mesh = OpenMaya.MFnMesh()
+m_DagMod = OpenMaya.MDagModifier()
+new_object = m_DagMod.createNode('transform')
+
+mFn_Mesh.create(numVertices, numPolygons, vertexArray, polygonCounts, polygonConnects, uArray, vArray, new_object)
+mFn_Mesh.setName(tmp_mesh_name)
+m_DagMod.doIt()     # sets up the transform parent to the mesh shape
+
+# PyNode for the mesh
+new_mesh = pmc.PyNode(tmp_mesh_name)
+new_transform = pmc.listRelatives(new_mesh, type='transform', parent=True)[0]
+
+
+
+
+http://help.autodesk.com/view/MAYAUL/2017/ENU/?guid=__py_ref_class_open_maya_1_1_m_fn_mesh_html
+
+http://ewertb.soundlinker.com/api/api.010.php
+add uvset
 
 
 

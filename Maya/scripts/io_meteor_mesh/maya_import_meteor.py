@@ -274,7 +274,69 @@ def read_amb_file(amb_path):
 						pmc.setKeyframe()
 					
 				print "Frame Index {0} succed".format(frame_index)
+
 				
+def parse_mesh_element(str):
+	str = strip_space_line(str)
+	
+	new_str = ""
+	last_a = ""
+	for i in range(0, len(str)):
+		if str[i] != " ":
+			new_str += str[i]
+		else:
+			if last_a != " ":
+				new_str += " "
+		last_a = str[i]
+	
+	split_str = new_str.split(" ")
+	vals = []
+	for i in range(0, len(split_str)):
+		vals.append(float(split_str[i]))
+		
+	return vals
+	
+# parse vertex 
+#  v   2.87744   0.99344  25.20086 vt 0.418 0.622 Bones 2 11 0.83333  2 0.16667		
+def parse_pos_uv_weight(line):
+	line = line.replace("vt", "tx")
+	vertex_line = re.split("v|tx|Bones",line)
+	vertex_data = []
+	
+	vertex_data.append(parse_mesh_element(vertex_line[1]))
+	vertex_data.append(parse_mesh_element(vertex_line[2]))
+	vertex_data.append(parse_mesh_element(vertex_line[3]))
+	
+	return vertex_data
+	
+def parse_face(line):
+	face_line = line[1:]
+	face_data = []
+	face_data = parse_mesh_element(face_line)
+	return face_data
+	
+def read_skc_file(skc_path):
+	file = open(skc_path, "r")
+	
+	line = file.readline()
+	
+	while True:
+		line = file.readline()
+		if not line:
+			break;
+			
+		line = strip_space_line(line)
+			
+		if line.find("Vertices") != -1:
+			print line
+		elif line[0] == "v":
+			vertex_data = parse_pos_uv_weight(line)
+			print vertex_data
+		elif line.find("Triangles") != -1:
+			print line
+		elif line[0] == "f":
+			print parse_face(line)
+			
 # main()	
 if __name__ == "__main__":
 	# read bnc
@@ -285,10 +347,12 @@ if __name__ == "__main__":
 	
 	# read amb
 	#amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\p0.amb.txt"
-	amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\character.amb.txt"
-	read_amb_file(amb_path)
+	#amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\character.amb.txt"
+	#read_amb_file(amb_path)
 	
-	
+	# read skc
+	skc_path = "D:\\Projects\\Meteor\\Maya\\assets\\p0.skc"
+	read_skc_file(skc_path)
 	
 	
 	
