@@ -7,6 +7,28 @@ import re
 
 import pymel.core as pmc
 import pymel.core.datatypes as pmdt
+import maya.api.OpenMaya as OpenMaya
+
+def to_PMatrix(mQuat):
+	pMatrix = pmdt.Matrix()
+	mMatrix = mQuat.asMatrix()
+	pMatrix.a00 = mMatrix[0]
+	pMatrix.a01 = mMatrix[1]
+	pMatrix.a02 = mMatrix[2]
+	pMatrix.a03 = mMatrix[3]
+	pMatrix.a10 = mMatrix[4]
+	pMatrix.a11 = mMatrix[5]
+	pMatrix.a12 = mMatrix[6]
+	pMatrix.a13 = mMatrix[7]
+	pMatrix.a20 = mMatrix[8]
+	pMatrix.a21 = mMatrix[9]
+	pMatrix.a22 = mMatrix[10]
+	pMatrix.a23 = mMatrix[11]
+	pMatrix.a30 = mMatrix[12]
+	pMatrix.a31 = mMatrix[13]
+	pMatrix.a32 = mMatrix[14]
+	pMatrix.a33 = mMatrix[15]
+	return pMatrix
 
 # 去除空格和换行符号
 def strip_space_line(in_str):
@@ -177,9 +199,8 @@ def read_bnc_file(file_path, bone_set):
 	for bone in bone_list:
 		pmc.select(bone.bone_name)
 		
-		rotateQuat = pmdt.Quaternion(bone.bone_quatX, bone.bone_quatY, bone.bone_quatZ, bone.bone_quatW)
-		rotateEuler = rotateQuat.asEulerRotation()
-		maya_mat = rotateEuler.asMatrix()
+		mQuat = OpenMaya.MQuaternion(bone.bone_quatX, bone.bone_quatY, bone.bone_quatZ, bone.bone_quatW)
+		maya_mat = to_PMatrix(mQuat)
 		maya_mat.a30 = bone.bone_pivotX
 		maya_mat.a31 = bone.bone_pivotY
 		maya_mat.a32 = bone.bone_pivotZ
@@ -240,10 +261,9 @@ def read_amb_file(amb_path):
 					bone = bone_list[i]
 					if bone.bone_type == "bone":
 						b_quat = bone_quat[i]
-						rotateQuat = pmdt.Quaternion(b_quat[1], b_quat[2], b_quat[3], b_quat[0])
-						rotateEuler = rotateQuat.asEulerRotation()
-						maya_mat = rotateEuler.asMatrix()
 						
+						mQuat = OpenMaya.MQuaternion(b_quat[1], b_quat[2], b_quat[3], b_quat[0])
+						maya_mat = to_PMatrix(mQuat)
 						if bone.bone_name == "b":
 							maya_mat.a30 = vec_offset[0]
 							maya_mat.a31 = vec_offset[1]
@@ -261,9 +281,8 @@ def read_amb_file(amb_path):
 						d_vec_offset =  dummey_vec_offset[int(i - 30)]
 						d_quat = dummey_quat[int(i-30)]
 						
-						rotateQuat = pmdt.Quaternion(d_quat[1], d_quat[2], d_quat[3], d_quat[0])
-						rotateEuler = rotateQuat.asEulerRotation()
-						maya_mat = rotateEuler.asMatrix()
+						mQuat = OpenMaya.MQuaternion(d_quat[1], d_quat[2], d_quat[3], d_quat[0])
+						maya_mat = to_PMatrix(mQuat)
 						maya_mat.a30 = d_vec_offset[0]
 						maya_mat.a31 = d_vec_offset[1]
 						maya_mat.a32 = d_vec_offset[2]
@@ -315,10 +334,19 @@ def parse_face(line):
 	face_data = parse_mesh_element(face_line)
 	return face_data
 	
-def read_skc_file(skc_path):
+def read_skc_file(skc_path, mesh_name):
 	file = open(skc_path, "r")
 	
 	line = file.readline()
+	
+	vertexArray = OpenMaya.MFloatPointArray()
+	uArray = OpenMaya.MFloatArray()
+	vArray = OpenMaya.MFloatArray()
+		
+	polygonCounts = OpenMaya.MIntArray()
+	polygonConnects = OpenMaya.MIntArray()
+	
+	vertexWeights = []
 	
 	while True:
 		line = file.readline()
@@ -326,19 +354,75 @@ def read_skc_file(skc_path):
 			break;
 			
 		line = strip_space_line(line)
-			
+		
 		if line.find("Vertices") != -1:
 			print line
 		elif line[0] == "v":
 			vertex_data = parse_pos_uv_weight(line)
-			print vertex_data
+			pos = vertex_data[0]
+			v = OpenMaya.MFloatPoint(pos[0], pos[1], pos[2])
+			vertexArray.append(v)
+			
+			uv = vertex_data[1]
+			uArray.append(uv[0])
+			vArray.append(uv[1])
+			
+			# bone weights
+			skin_data = vertex_data[2]
+			weight_num = skin_data[0]
+			weights = []
+			for bi in range(0, int(weight_num)):
+				tmp_bone_idx = skin_data[int(1 + 2 * bi)]
+				tmp_bone_name = bone_name_list[int(tmp_bone_idx)]
+				tmp_bone_weight = skin_data[int(2 + 2 * bi)]
+				key_value = (tmp_bone_name, tmp_bone_weight)
+				weights.append(key_value)
+			vertexWeights.append(weights)
+			
 		elif line.find("Triangles") != -1:
 			print line
 		elif line[0] == "f":
-			print parse_face(line)
+			face_data = parse_face(line)
+			polygonCounts.append(3)
 			
+			polygonConnects.append(int(face_data[2]))
+			polygonConnects.append(int(face_data[3]))
+			polygonConnects.append(int(face_data[4]))
+			
+	mFn_Mesh = OpenMaya.MFnMesh()
+	m_DagMod = OpenMaya.MDagModifier()
+	new_object = m_DagMod.createNode('transform')
+	
+	mFn_Mesh.create(vertexArray, polygonCounts, polygonConnects, uArray, vArray, new_object)
+	mFn_Mesh.setName(mesh_name)
+	m_DagMod.doIt()
+	
+	new_mesh = pmc.PyNode(mesh_name)
+	new_transform = pmc.listRelatives(new_mesh, type='transform', parent=True)[0]
+	
+	mFn_Mesh.assignUVs(polygonCounts, polygonConnects, 'map1')
+	
+	node_name = mesh_name + "_mesh"
+	
+	pmc.select(new_transform)
+	pmc.rename(new_transform, node_name)
+	pmc.rotate(0, -90.0, 0)
+	
+	# skin cluster
+	pmc.select(bone_name_list[0], add = True)
+	skin_cluster = pmc.skinCluster(bindMethod=0, skinMethod=1, normalizeWeights=0, maximumInfluences=4, obeyMaxInfluences=True)
+	pmc.select(node_name, r = True)
+	pmc.skinPercent(skin_cluster, node_name, normalize=False, pruneWeights=100)
+	
+	for v in range(0, len(vertexWeights)):
+		pmc.skinPercent(skin_cluster, "{0}.vtx[{1}]".format(node_name, v), transformValue=vertexWeights[v], normalize=True)
+		
+		
+		
 # main()	
 if __name__ == "__main__":
+
+	"""
 	# read bnc
 	file_path = "D:\\Projects\\Meteor\\Maya\\assets\\P{0}.bnc".format(int(1))
 	#bone_set = "_P{0}".format(p)
@@ -346,22 +430,40 @@ if __name__ == "__main__":
 	print "import bnc succed"
 	
 	# read amb
-	#amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\p0.amb.txt"
+	amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\p0.amb.txt"
 	#amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\character.amb.txt"
-	#read_amb_file(amb_path)
+	read_amb_file(amb_path)
+	print "import amb succed"
 	
 	# read skc
 	skc_path = "D:\\Projects\\Meteor\\Maya\\assets\\p0.skc"
-	read_skc_file(skc_path)
+	read_skc_file(skc_path, "p0")
+	print "import skc succed"
+	
+	skc_path = "D:\\Projects\\Meteor\\Maya\\assets\\p0_300.skc"
+	read_skc_file(skc_path, "p0_300")
+	print "import skc succed"
+	
+	skc_path = "D:\\Projects\\Meteor\\Maya\\assets\\p0_800.skc"
+	read_skc_file(skc_path, "p0_800")
+	print "import skc succed"
+	
+	"""
+	
+	file_path = "D:\\Projects\\Meteor\\Maya\\assets\\P3.bnc"
+	read_bnc_file(file_path, "")
+	print "import bnc succed"
+	
+	skc_path = "D:\\Projects\\Meteor\\Maya\\assets\\p3.skc"
+	read_skc_file(skc_path, "p3")
+	print "import skc succed"
+	
+	amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\p3.amb.txt"
+	read_amb_file(amb_path)
+	print "import amb succed"
 	
 	
 	
-	
-	
-	
-	
-
-
 
 
 

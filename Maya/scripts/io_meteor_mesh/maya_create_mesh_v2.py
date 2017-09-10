@@ -52,24 +52,29 @@ vArray.append(0.0)
 uArray.append(1.0)
 vArray.append(1.0)
 
+uArray.append(2.0)
+vArray.append(0.0)
+
+uArray.append(2.0)
+vArray.append(1.0)
+
 # flip uv in v
 for i in range(0, len(vArray)):
 	vArray[i] = 1.0 - vArray[i]
 
 mFn_Mesh = OpenMaya.MFnMesh()
-m_DagMod = OpenMaya.MDagModifier()
-new_object = m_DagMod.createNode('transform')
 
 tmp_mesh_name = "haha"
 
-mFn_Mesh.create(vertexArray, polygonCounts, polygonConnects, uArray, vArray, new_object)
+mFn_Mesh.create(vertexArray, polygonCounts, polygonConnects, uArray, vArray)
 mFn_Mesh.setName(tmp_mesh_name)
-m_DagMod.doIt()
 
 new_mesh = pmc.PyNode(tmp_mesh_name)
 new_transform = pmc.listRelatives(new_mesh, type='transform', parent=True)[0]
 
 uvCounts = OpenMaya.MIntArray()
+uvCounts.append(3)
+uvCounts.append(3)
 uvCounts.append(3)
 uvCounts.append(3)
 
@@ -80,6 +85,13 @@ uvIds.append(1)
 uvIds.append(0)
 uvIds.append(3)
 uvIds.append(2)
+uvIds.append(3)
+uvIds.append(4)
+uvIds.append(2)
+uvIds.append(3)
+uvIds.append(5)
+uvIds.append(4)
+
 mFn_Mesh.assignUVs(uvCounts, uvIds, 'map1')
 
 

@@ -167,12 +167,48 @@ new_mesh = pmc.PyNode(tmp_mesh_name)
 new_transform = pmc.listRelatives(new_mesh, type='transform', parent=True)[0]
 
 
-
-
 http://help.autodesk.com/view/MAYAUL/2017/ENU/?guid=__py_ref_class_open_maya_1_1_m_fn_mesh_html
 
 http://ewertb.soundlinker.com/api/api.010.php
 add uvset
+
+多个uvset不应该在create的时候提供，而应该在后期提供
+uv的顺序是跟着vertexIndex来走的，只要每个三角形能找到自己的uv坐标即可
+
+软边
+硬边
+分列前 分裂后
+
+uv 切割后，同一个位置的顶点，会对应不同位置的uv
+
+https://www.youtube.com/watch?v=-HL_Upp5YBc
+Stepping Up the UV process ( Full modeling / texturing tutorial )
+
+
+help
+http://help.autodesk.com/view/MAYAUL/2016/CHS/?guid=__py_ref_class_open_maya_1_1_m_quaternion_html
+
+
+#########################
+
+http://help.autodesk.com/view/MAYAUL/2016/CHS/?guid=__py_ref_class_open_maya_anim_1_1_m_fn_skin_cluster_html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

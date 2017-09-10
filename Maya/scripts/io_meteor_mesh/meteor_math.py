@@ -1,6 +1,8 @@
 # -- coding: utf-8 --
 import math
 
+
+
 def toQuat(rx, ry, rz, angle):
 	quat = [0,0,0,0]
 	rad = math.radians(angle * 0.5)
@@ -86,5 +88,33 @@ def quat2maya_matrix(x, y, z, w):
 	
 	return matrix
 	
+	
+import pymel.core.datatypes as pmdt
+import maya.api.OpenMaya as OpenMaya
 
+def to_PMatrix(mQuat):
+	pMatrix = pmdt.Matrix()
+	mMatrix = mQuat.asMatrix()
+	pMatrix.a00 = mMatrix[0]
+	pMatrix.a01 = mMatrix[1]
+	pMatrix.a02 = mMatrix[2]
+	pMatrix.a03 = mMatrix[3]
+	pMatrix.a10 = mMatrix[4]
+	pMatrix.a11 = mMatrix[5]
+	pMatrix.a12 = mMatrix[6]
+	pMatrix.a13 = mMatrix[7]
+	pMatrix.a20 = mMatrix[8]
+	pMatrix.a21 = mMatrix[9]
+	pMatrix.a22 = mMatrix[10]
+	pMatrix.a23 = mMatrix[11]
+	pMatrix.a30 = mMatrix[12]
+	pMatrix.a31 = mMatrix[13]
+	pMatrix.a32 = mMatrix[14]
+	pMatrix.a33 = mMatrix[15]
+	return pMatrix
+	
+mquat = OpenMaya.MQuaternion(1, 0, 0, 1)
+
+pMat = to_PMatrix(mquat)
+print pMat
 
