@@ -194,14 +194,41 @@ http://help.autodesk.com/view/MAYAUL/2016/CHS/?guid=__py_ref_class_open_maya_1_1
 http://help.autodesk.com/view/MAYAUL/2016/CHS/?guid=__py_ref_class_open_maya_anim_1_1_m_fn_skin_cluster_html
 
 
+给模型添加材质
+shadingNode -asShader lambert;
+// 结果: lambert3 // 
+sets -renderable true -noSurfaceShader true -empty -name lambert3SG;
+// 结果: lambert3SG // 
+connectAttr -f lambert3.outColor lambert3SG.surfaceShader;
+// 结果: 已将 lambert3.outColor 连接到 lambert3SG.surfaceShader。 // 
+assignCreatedShader "lambert" "" lambert3 "pCone1.f[17:19]";
+sets -e -forceElement lambert3SG;
+
+
+"pSphere1.f[207:208] pSphere1.f[227:228] pSphere1.f[237] pSphere1.f[253] pSphere1.f[257] pSphere1.f[273]"
+
+
+https://knowledge.autodesk.com/support/maya/learn-explore/caas/CloudHelp/cloudhelp/2016/ENU/Maya/files/GUID-6BA1E3DF-F033-443C-989F-9A3295FFC152-htm.html
 
 
 
 
 
+import pymel.core as pmc
+
+shader_name = "body_shader"
+new_shader = pmc.shadingNode("lambert", asShader=True, name=shader_name)
+new_shadinggroup = pmc.sets(renderable=True, noSurfaceShader=True, empty=True, name='{}_SG'.format(shader_name))
+pmc.connectAttr(new_shader.outColor, new_shadinggroup.surfaceShader)
+
+pmc.select("pCube1.f[0]")
+pmc.hyperShade(assign=new_shadinggroup)
 
 
-
+# TODO: should this be an enum attribute type?
+# would need to parse the possible engine/material combinations from clausewitz.json
+#pmc.addAttr(longName=PDX_SHADER, dataType='string')
+#getattr(new_shader, PDX_SHADER).set(PDX_material.shader)
 
 
 

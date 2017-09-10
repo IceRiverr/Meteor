@@ -348,6 +348,9 @@ def read_skc_file(skc_path, mesh_name):
 	
 	vertexWeights = []
 	
+	material_num = 0
+	material_sets = []
+	
 	while True:
 		line = file.readline()
 		if not line:
@@ -355,7 +358,12 @@ def read_skc_file(skc_path, mesh_name):
 			
 		line = strip_space_line(line)
 		
-		if line.find("Vertices") != -1:
+		if line.find("Materials") != -1:
+			line = strip_space_line(line)
+			material_num = int(line.split(":")[1])
+			for i in range(0, int(material_num)):
+				material_sets.append(0)
+		elif line.find("Vertices") != -1:
 			print line
 		elif line[0] == "v":
 			vertex_data = parse_pos_uv_weight(line)
@@ -365,7 +373,7 @@ def read_skc_file(skc_path, mesh_name):
 			
 			uv = vertex_data[1]
 			uArray.append(uv[0])
-			vArray.append(uv[1])
+			vArray.append(1.0 - uv[1])
 			
 			# bone weights
 			skin_data = vertex_data[2]
@@ -389,6 +397,9 @@ def read_skc_file(skc_path, mesh_name):
 			polygonConnects.append(int(face_data[3]))
 			polygonConnects.append(int(face_data[4]))
 			
+			# assign material
+			material_sets[int(face_data[1])] += 1
+			
 	mFn_Mesh = OpenMaya.MFnMesh()
 	m_DagMod = OpenMaya.MDagModifier()
 	new_object = m_DagMod.createNode('transform')
@@ -408,6 +419,32 @@ def read_skc_file(skc_path, mesh_name):
 	pmc.rename(new_transform, node_name)
 	pmc.rotate(0, -90.0, 0)
 	
+	# create material
+	# pCylinder1.f[14:17] _mesh.f[{0}:{1}].format()
+	material_starts = []
+	material_ends = []
+	mesh_selcte_sets = []
+	
+	material_starts.append(0)
+	material_ends.append(material_sets[0] - 1)
+	
+	mesh_selcte_sets.append(node_name + ".f[{0}:{1}]".format(int(material_starts[0]), int(material_ends[0])))
+	
+	for i in range(1, len(material_sets)):
+		material_starts.append(material_ends[int(i-1)] + 1)
+		material_ends.append(material_ends[int(i-1)] + material_sets[i])
+		
+		mesh_selcte_sets.append(node_name + ".f[{0}:{1}]".format(int(material_starts[i]), int(material_ends[i])))
+		
+	for i in range(0, len(mesh_selcte_sets)):
+		shader_name = "p_shader{0}".format(int(i))
+		new_shader = pmc.shadingNode("lambert", asShader=True, name=shader_name)
+		new_shadinggroup = pmc.sets(renderable=True, noSurfaceShader=True, empty=True, name='{}_SG'.format(shader_name))
+		pmc.connectAttr(new_shader.outColor, new_shadinggroup.surfaceShader)
+
+		pmc.select(mesh_selcte_sets[i])
+		pmc.hyperShade(assign=new_shadinggroup)
+	
 	# skin cluster
 	pmc.select(bone_name_list[0], add = True)
 	skin_cluster = pmc.skinCluster(bindMethod=0, skinMethod=1, normalizeWeights=0, maximumInfluences=4, obeyMaxInfluences=True)
@@ -416,8 +453,7 @@ def read_skc_file(skc_path, mesh_name):
 	
 	for v in range(0, len(vertexWeights)):
 		pmc.skinPercent(skin_cluster, "{0}.vtx[{1}]".format(node_name, v), transformValue=vertexWeights[v], normalize=True)
-		
-		
+	
 		
 # main()	
 if __name__ == "__main__":
@@ -458,9 +494,10 @@ if __name__ == "__main__":
 	read_skc_file(skc_path, "p3")
 	print "import skc succed"
 	
-	amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\p3.amb.txt"
-	read_amb_file(amb_path)
-	print "import amb succed"
+	# 注意先后顺序，必须放在后面
+	#amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\p3.amb.txt"
+	#read_amb_file(amb_path)
+	#print "import amb succed"
 	
 	
 	
