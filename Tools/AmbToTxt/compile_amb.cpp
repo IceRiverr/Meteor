@@ -1,8 +1,8 @@
-#define  _CRT_SECURE_NO_WARNINGS
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string>
+using namespace std;
 
 void ansysAmb(const char* iInFileName, const char* iOutFileName){
    FILE* fp1;
@@ -81,11 +81,22 @@ void ansysAmb(const char* iInFileName, const char* iOutFileName){
    delete[] text;
 }
 int main(int argc, char** argv){
-	ansysAmb("Data/p0.amb", "Data/p0.amb.txt");
-    ansysAmb("Data/p3.amb", "Data/p3.amb.txt");
-	ansysAmb("Data/character.amb", "Data/character.amb.txt");
+	if (argc < 3)
+	{
+		printf("please input file to converte.");
+		return 0;
+	}
 	
-	printf("Over\n");
-    getchar();
+	std::string folder = argv[1];
+	
+	for (int i = 2; i < argc; ++i)
+	{
+		std::string ambPath = folder + argv[i];
+		std::string amcPath = folder + argv[i] + ".txt";
+		ansysAmb(ambPath.c_str(), amcPath.c_str());
+		printf("Convert %s succed\n\n", argv[i]);
+	}
+	
+	printf("All down\n");
     return 0;
 }

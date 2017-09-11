@@ -231,6 +231,26 @@ pmc.hyperShade(assign=new_shadinggroup)
 #getattr(new_shader, PDX_SHADER).set(PDX_material.shader)
 
 
+# main()	
+if __name__ == "__main__":
+	pModel_path = "D:\\Projects\\Meteor\\Game\\Meteor\\pmodel\\"
+	npc_id = 3
+	
+	bnc_path = pModel_path + "P{0}.bnc".format(int(npc_id))
+	skc_path = pModel_path + "p{0}.skc".format(int(npc_id))
+	mesh_name = "p{0}".format(int(npc_id))
+	amb_path = pModel_path + "p{0}.amb.txt".format(int(npc_id))
+	
+	read_bnc_file(bnc_path, "")
+	print "import bnc succed"
+	
+	read_skc_file(skc_path, mesh_name)
+	print "import skc succed"
+	
+	# 注意先后顺序，必须放在后面
+	read_amb_file(amb_path)
+	print "import amb succed"
+
 
 
 

@@ -35,3 +35,6 @@ Unity/Assets/Meteor/Leg/
 Unity/Assets/Meteor/Prefabs/
 *.meta
 
+Tools/AmbToTxt/Release/
+Tools/AmbToTxt/bin/
+Tools/AmbToTxt/Data/

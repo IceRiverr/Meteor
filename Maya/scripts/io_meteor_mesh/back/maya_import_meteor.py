@@ -1,4 +1,4 @@
-# -*- coding:utf-8 -*-  
+# -- coding: utf-8 --
 
 import os
 import sys
@@ -419,6 +419,32 @@ def read_skc_file(skc_path, mesh_name):
 	pmc.rename(new_transform, node_name)
 	pmc.rotate(0, -90.0, 0)
 	
+	# create material
+	# pCylinder1.f[14:17] _mesh.f[{0}:{1}].format()
+	material_starts = []
+	material_ends = []
+	mesh_selcte_sets = []
+	
+	material_starts.append(0)
+	material_ends.append(material_sets[0] - 1)
+	
+	mesh_selcte_sets.append(node_name + ".f[{0}:{1}]".format(int(material_starts[0]), int(material_ends[0])))
+	
+	for i in range(1, len(material_sets)):
+		material_starts.append(material_ends[int(i-1)] + 1)
+		material_ends.append(material_ends[int(i-1)] + material_sets[i])
+		
+		mesh_selcte_sets.append(node_name + ".f[{0}:{1}]".format(int(material_starts[i]), int(material_ends[i])))
+		
+	for i in range(0, len(mesh_selcte_sets)):
+		shader_name = "p_shader{0}".format(int(i))
+		new_shader = pmc.shadingNode("lambert", asShader=True, name=shader_name)
+		new_shadinggroup = pmc.sets(renderable=True, noSurfaceShader=True, empty=True, name='{}_SG'.format(shader_name))
+		pmc.connectAttr(new_shader.outColor, new_shadinggroup.surfaceShader)
+
+		pmc.select(mesh_selcte_sets[i])
+		pmc.hyperShade(assign=new_shadinggroup)
+	
 	# skin cluster
 	pmc.select(bone_name_list[0], add = True)
 	skin_cluster = pmc.skinCluster(bindMethod=0, skinMethod=1, normalizeWeights=0, maximumInfluences=4, obeyMaxInfluences=True)
@@ -428,61 +454,52 @@ def read_skc_file(skc_path, mesh_name):
 	for v in range(0, len(vertexWeights)):
 		pmc.skinPercent(skin_cluster, "{0}.vtx[{1}]".format(node_name, v), transformValue=vertexWeights[v], normalize=True)
 	
-	#create material
-	#pCylinder1.f[14:17] _mesh.f[{0}:{1}].format()
 	
-	material_starts = []
-	material_ends = []
-	mesh_selcte_sets = []
-	
-	material_starts.append(0)
-	material_ends.append(material_sets[0] - 1)
-	mesh_selcte_sets.append(node_name + ".f[{0}:{1}]".format(int(material_starts[0]), int(material_ends[0])))
-	for i in range(1, len(material_sets)):
-		material_starts.append(material_ends[int(i-1)] + 1)
-		material_ends.append(material_ends[int(i-1)] + material_sets[i])
-		mesh_selcte_sets.append(node_name + ".f[{0}:{1}]".format(int(material_starts[i]), int(material_ends[i])))
-	
-	print mesh_selcte_sets
-	
-	# 没有这一句会出错，必须将以前的选择清理掉
-	pmc.select( clear=True )
-	
-	for i in range(0, len(mesh_selcte_sets)):
-		shader_name = "p_shader{0}".format(int(i))
-		new_shader = pmc.shadingNode("lambert", asShader=True, name=shader_name)
-		new_shadinggroup = pmc.sets(renderable=True, noSurfaceShader=True, empty=True, name='{}_SG'.format(shader_name))
-		pmc.connectAttr(new_shader.outColor, new_shadinggroup.surfaceShader)
-		
-		pmc.select(mesh_selcte_sets[i])
-		pmc.hyperShade(assign=new_shadinggroup)
-		pmc.select( clear=True )
-		
 # main()	
 if __name__ == "__main__":
 
-	pModel_path = "D:\\Projects\\Meteor\\Game\\Meteor\\pmodel\\"
-	npc_id = 0
-	
-	bnc_path = pModel_path + "P{0}.bnc".format(int(npc_id))
-	skc_path = pModel_path + "p{0}.skc".format(int(npc_id))
-	mesh_name = "p{0}".format(int(npc_id))
-	amb_path = pModel_path + "p{0}.amb.txt".format(int(npc_id))
-	
-	character_amb_path = pModel_path + "character.amb.txt"
-	
-	read_bnc_file(bnc_path, "")
+	"""
+	# read bnc
+	file_path = "D:\\Projects\\Meteor\\Maya\\assets\\P{0}.bnc".format(int(1))
+	#bone_set = "_P{0}".format(p)
+	read_bnc_file(file_path, "")
 	print "import bnc succed"
 	
-	read_skc_file(skc_path, mesh_name)
+	# read amb
+	amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\p0.amb.txt"
+	#amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\character.amb.txt"
+	read_amb_file(amb_path)
+	print "import amb succed"
+	
+	# read skc
+	skc_path = "D:\\Projects\\Meteor\\Maya\\assets\\p0.skc"
+	read_skc_file(skc_path, "p0")
+	print "import skc succed"
+	
+	skc_path = "D:\\Projects\\Meteor\\Maya\\assets\\p0_300.skc"
+	read_skc_file(skc_path, "p0_300")
+	print "import skc succed"
+	
+	skc_path = "D:\\Projects\\Meteor\\Maya\\assets\\p0_800.skc"
+	read_skc_file(skc_path, "p0_800")
+	print "import skc succed"
+	
+	"""
+	
+	file_path = "D:\\Projects\\Meteor\\Maya\\assets\\P3.bnc"
+	read_bnc_file(file_path, "")
+	print "import bnc succed"
+	
+	skc_path = "D:\\Projects\\Meteor\\Maya\\assets\\p3.skc"
+	read_skc_file(skc_path, "p3")
 	print "import skc succed"
 	
 	# 注意先后顺序，必须放在后面
+	#amb_path = "D:\\Projects\\Meteor\\Maya\\assets\\p3.amb.txt"
 	#read_amb_file(amb_path)
 	#print "import amb succed"
 	
-	read_amb_file(character_amb_path)
-	print "import character amb succed"
+	
 	
 
 
