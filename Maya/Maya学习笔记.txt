@@ -29,8 +29,6 @@ S 快速k帧
 F8点模式--窗口--常规编辑器--组件编辑器--平滑蒙皮--选择点
 
 
-
-
 import maya.cmds as cmds
 
 # Non-planar faces
@@ -250,6 +248,58 @@ if __name__ == "__main__":
 	# 注意先后顺序，必须放在后面
 	read_amb_file(amb_path)
 	print "import amb succed"
+	
+	
+import pymel.core as pmc
+import pymel.core.datatypes as pmdt
+
+pmc.select("d_base")
+pmc.parent("d_base", world=True)
+
+pmc.select("NULL")
+pmc.delete("NULL")
+
+for frame_index in range(0, 17065):
+	pmc.currentTime(int(frame_index))
+	pmc.select("d_base")
+	rotateX = pmc.getAttr("d_base.rotateX")
+	rotateY = pmc.getAttr("d_base.rotateY")
+	rotateZ = pmc.getAttr("d_base.rotateZ")
+	
+	transX = pmc.getAttr("d_base.translateX")
+	transY = pmc.getAttr("d_base.translateY")
+	transZ = pmc.getAttr("d_base.translateZ")
+	
+	if rotateX != 0 or rotateY != 0 or rotateZ != 0:
+		print "{"
+		print frame_index
+		print rotateX
+		print rotateY
+		print rotateZ
+		print "}"
+	
+	rotateX += -90 
+	
+	euler = pmdt.EulerRotation([rotateX, rotateY, rotateZ], unit= "degrees", ord = "ZYX")
+	mat = euler.asMatrix()
+	
+	mat.a30 = transX
+	mat.a31 = transY
+	mat.a32 = transZ
+	
+	pmc.xform(matrix = mat)
+	
+	pmc.setKeyframe()
+	print frame_index
+
+
+
+
+
+
+
+
+
 
 
 

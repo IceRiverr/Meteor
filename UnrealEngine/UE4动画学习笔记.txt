@@ -1,0 +1,13 @@
+比如使用动画蒙太奇（AnimMontage）来计算在窗台上移动或者墙上行走的动画表现
+
+motioncapture的动画库
+
+mocap 动画
+
+BVH 动画
+
+ CLIMBING SYSTEM - UE4 - WIP 2 - Tutorial in description
+ 
+
+ https://www.youtube.com/watch?v=FDbpHamn2eY&list=PLfWCacrXuIS-EZGldfemhkkfQwPFhAYXd
+Skeleton Assets: Overview | 01 | v4.8 Tutorial Series | Unreal Engine

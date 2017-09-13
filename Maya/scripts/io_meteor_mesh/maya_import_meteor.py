@@ -9,6 +9,18 @@ import pymel.core as pmc
 import pymel.core.datatypes as pmdt
 import maya.api.OpenMaya as OpenMaya
 
+def toQuat(rx, ry, rz, angle):
+	quat = [0,0,0,0]
+	rad = math.radians(angle * 0.5)
+	sinA = math.sin(rad)
+	cosA = math.cos(rad)
+	
+	quat[0] = rx * sinA
+	quat[1] = ry * sinA
+	quat[2] = rz * sinA
+	quat[3]= cosA
+	return quat
+
 def to_PMatrix(mQuat):
 	pMatrix = pmdt.Matrix()
 	mMatrix = mQuat.asMatrix()
@@ -69,8 +81,7 @@ class BoneInfo(object):
 	
 bone_list = []
 bone_name_list = []
-bone_pivot_list = []
-	
+
 num_bones = 0
 num_dummey = 0
 
@@ -143,7 +154,6 @@ def read_bnc_file(file_path, bone_set):
 			bone_info.bone_pivotY = str2float(line_string[-2])
 			bone_info.bone_pivotZ = str2float(line_string[-1])
 			
-			
 			# bnc 中的四元数 格式为 wxyz 需要转为 xyzw
 			line = file.readline()
 			line_string = split_space(line)
@@ -152,6 +162,31 @@ def read_bnc_file(file_path, bone_set):
 			bone_info.bone_quatZ = str2float(line_string[-1])
 			bone_info.bone_quatW = str2float(line_string[-4])
 			
+			# 将根骨骼的移动进行切换，导入的数据是z轴朝上，需要转为Y轴朝上
+			if bone_info.bone_name == "d_base" + bone_set:
+				tmp_pX = bone_info.bone_pivotX
+				tmp_pY = bone_info.bone_pivotY
+				tmp_pZ = bone_info.bone_pivotZ
+				
+				bone_info.bone_pivotX = tmp_pX
+				bone_info.bone_pivotY = tmp_pZ
+				bone_info.bone_pivotZ = -tmp_pY
+				
+				tmp_qX = bone_info.bone_quatX
+				tmp_qY = bone_info.bone_quatY
+				tmp_qZ = bone_info.bone_quatZ
+				
+				if bone_info.bone_quatW == -1:
+					new_quat = toQuat(1.0, 0.0, 0.0, -90.0)
+					bone_info.bone_quatX = new_quat[0]
+					bone_info.bone_quatY = new_quat[1]
+					bone_info.bone_quatZ = new_quat[2]
+					bone_info.bone_quatW = new_quat[3]
+				else:
+					bone_info.bone_quatX = tmp_qX
+					bone_info.bone_quatY = tmp_qZ
+					bone_info.bone_quatZ = -tmp_qY
+				
 			if isBond:
 				line = file.readline()
 				line_string = split_space(line)
@@ -165,7 +200,6 @@ def read_bnc_file(file_path, bone_set):
 				
 			bone_name_list.append(bone_info.bone_name)
 			bone_list.append(bone_info)
-			bone_pivot_list.append([bone_info.bone_pivotX, bone_info.bone_pivotY, bone_info.bone_pivotZ])
 			
 	file.close()
 	
@@ -179,9 +213,6 @@ def read_bnc_file(file_path, bone_set):
 			bone_list[i].bone_parent = bone_name_list[int(float(parent_index))]
 		if pre_leter == "d":
 			bone_list[i].bone_parent = bone_name_list[int(float(parent_index) + num_bones)]
-			
-	group = pmc.group(em=True, n = "NULL" + bone_set)
-	pmc.rotate(0, -90.0, 0)
 	
 	for bone in bone_list:
 		if bone.bone_type == "bone":
@@ -194,8 +225,11 @@ def read_bnc_file(file_path, bone_set):
 			pmc.parent(new_dummey, world=True)
 	
 	for bone in bone_list:
-		pmc.parent(bone.bone_name, bone.bone_parent)
-		
+		if bone.bone_parent == "NULL":
+			pmc.parent(bone.bone_name, world=True)
+		else:
+			pmc.parent(bone.bone_name, bone.bone_parent)
+	
 	for bone in bone_list:
 		pmc.select(bone.bone_name)
 		
@@ -206,11 +240,10 @@ def read_bnc_file(file_path, bone_set):
 		maya_mat.a32 = bone.bone_pivotZ
 		
 		pmc.xform(matrix = maya_mat)
-		
-		#pmc.parent(bone.bone_name, world=True)
-		#pmc.connectJoint(bone.bone_name, bone.bone_parent, parentMode=True)
 		pmc.select(clear = True)
 		
+	pmc.select( clear=True )
+	
 
 def parse_amb_value(line, num):
 	value_strs = re.split("=|,|\n|\r",strip_space_line(line))
@@ -219,7 +252,7 @@ def parse_amb_value(line, num):
 		value_arr.append(float(value_strs[n - num]))
 	return value_arr
 	
-def read_amb_file(amb_path):
+def read_amb_file(amb_path, start_frame = -1, end_frame = -1):
 	file = open(amb_path, "r")
 	
 	line = file.readline()
@@ -227,6 +260,10 @@ def read_amb_file(amb_path):
 	num_dummey = parse_amb_value(file.readline(), 1)
 	num_frame = parse_amb_value(file.readline(), 1)
 	unknow = parse_amb_value(file.readline(), 1)
+	
+	if (start_frame == -1) and (end_frame == -1):
+		start_frame = 0
+		end_frame = num_frame
 	
 	while True:
 		line = file.readline()
@@ -237,6 +274,7 @@ def read_amb_file(amb_path):
 			line = file.readline()
 			if line.find("frame index") != -1:
 				frame_index = int(line.split("=")[-1])
+				
 				# base offset
 				vec_offset = parse_amb_value(file.readline(), 3)
 				bone_quat = []
@@ -253,47 +291,72 @@ def read_amb_file(amb_path):
 					line = file.readline()
 					d_vec_offset = parse_amb_value(file.readline(), 3)
 					d_quat = parse_amb_value(file.readline(), 4)
+					
+					# 翻转轴向 Z -- Y
+					if di == 0:
+						tmp_pX = d_vec_offset[0]
+						tmp_pY = d_vec_offset[1]
+						tmp_pZ = d_vec_offset[2]
+						
+						d_vec_offset[0] = tmp_pX
+						d_vec_offset[1] = tmp_pZ
+						d_vec_offset[2] = -tmp_pY
+						
+						tmp_qX = d_quat[1]
+						tmp_qY = d_quat[2]
+						tmp_qZ = d_quat[3]
+						
+						if d_quat[0] == -1 and d_quat[1] == 0 and d_quat[2] == 0 and d_quat[3] == 0:
+							new_quat = toQuat(1.0, 0.0, 0.0, -90.0)
+							d_quat[1] = new_quat[0]
+							d_quat[2] = new_quat[1]
+							d_quat[3] = new_quat[2]
+							d_quat[0] = new_quat[3]
+						else:
+							d_quat[1] = tmp_qX
+							d_quat[2] = tmp_qZ
+							d_quat[3] = -tmp_qY
+						
 					dummey_vec_offset.append(d_vec_offset)
 					dummey_quat.append(d_quat)
 					
-				#print bone_list
-				for i in range(0, 36):
-					bone = bone_list[i]
-					if bone.bone_type == "bone":
-						b_quat = bone_quat[i]
-						
-						mQuat = OpenMaya.MQuaternion(b_quat[1], b_quat[2], b_quat[3], b_quat[0])
-						maya_mat = to_PMatrix(mQuat)
-						if bone.bone_name == "b":
-							maya_mat.a30 = vec_offset[0]
-							maya_mat.a31 = vec_offset[1]
-							maya_mat.a32 = vec_offset[2]
-						else:
-							maya_mat.a30 = bone.bone_pivotX
-							maya_mat.a31 = bone.bone_pivotY
-							maya_mat.a32 = bone.bone_pivotZ
-						
-						pmc.currentTime(int(frame_index))
-						pmc.select(bone.bone_name)
-						pmc.xform(matrix = maya_mat)
-						pmc.setKeyframe()
-					elif bone.bone_type == "Dummey":
-						d_vec_offset =  dummey_vec_offset[int(i - 30)]
-						d_quat = dummey_quat[int(i-30)]
-						
-						mQuat = OpenMaya.MQuaternion(d_quat[1], d_quat[2], d_quat[3], d_quat[0])
-						maya_mat = to_PMatrix(mQuat)
-						maya_mat.a30 = d_vec_offset[0]
-						maya_mat.a31 = d_vec_offset[1]
-						maya_mat.a32 = d_vec_offset[2]
-						
-						pmc.currentTime(int(frame_index))
-						pmc.select(bone.bone_name)
-						pmc.xform(matrix = maya_mat)
-						pmc.setKeyframe()
-					
-				print "Frame Index {0} succed".format(frame_index)
-
+				if (frame_index >= start_frame) and (frame_index < end_frame):
+					#print bone_list
+					for i in range(0, 36):
+						bone = bone_list[i]
+						if bone.bone_type == "bone":
+							b_quat = bone_quat[i]
+							
+							mQuat = OpenMaya.MQuaternion(b_quat[1], b_quat[2], b_quat[3], b_quat[0])
+							maya_mat = to_PMatrix(mQuat)
+							if bone.bone_name == "b":
+								maya_mat.a30 = vec_offset[0]
+								maya_mat.a31 = vec_offset[1]
+								maya_mat.a32 = vec_offset[2]
+							else:
+								maya_mat.a30 = bone.bone_pivotX
+								maya_mat.a31 = bone.bone_pivotY
+								maya_mat.a32 = bone.bone_pivotZ
+							
+							pmc.currentTime(int(frame_index))
+							pmc.select(bone.bone_name)
+							pmc.xform(matrix = maya_mat)
+							pmc.setKeyframe()
+						elif bone.bone_type == "Dummey":
+							d_vec_offset =  dummey_vec_offset[int(i - 30)]
+							d_quat = dummey_quat[int(i-30)]
+							
+							mQuat = OpenMaya.MQuaternion(d_quat[1], d_quat[2], d_quat[3], d_quat[0])
+							maya_mat = to_PMatrix(mQuat)
+							maya_mat.a30 = d_vec_offset[0]
+							maya_mat.a31 = d_vec_offset[1]
+							maya_mat.a32 = d_vec_offset[2]
+							
+							pmc.currentTime(int(frame_index))
+							pmc.select(bone.bone_name)
+							pmc.xform(matrix = maya_mat)
+							pmc.setKeyframe()
+					print "Frame Index {0} succed".format(frame_index)
 				
 def parse_mesh_element(str):
 	str = strip_space_line(str)
@@ -457,37 +520,46 @@ def read_skc_file(skc_path, mesh_name):
 		pmc.select(mesh_selcte_sets[i])
 		pmc.hyperShade(assign=new_shadinggroup)
 		pmc.select( clear=True )
-		
-# main()	
-if __name__ == "__main__":
 
+
+def read_NPC_data(npc_id, bRead_amb = True):
 	pModel_path = "D:\\Projects\\Meteor\\Game\\Meteor\\pmodel\\"
-	npc_id = 0
 	
 	bnc_path = pModel_path + "P{0}.bnc".format(int(npc_id))
 	skc_path = pModel_path + "p{0}.skc".format(int(npc_id))
 	mesh_name = "p{0}".format(int(npc_id))
 	amb_path = pModel_path + "p{0}.amb.txt".format(int(npc_id))
-	
-	character_amb_path = pModel_path + "character.amb.txt"
-	
+		
 	read_bnc_file(bnc_path, "")
 	print "import bnc succed"
 	
+	pmc.select( clear=True )
 	read_skc_file(skc_path, mesh_name)
 	print "import skc succed"
 	
 	# 注意先后顺序，必须放在后面
-	#read_amb_file(amb_path)
-	#print "import amb succed"
+	if bRead_amb:
+		read_amb_file(amb_path)
+		print "import amb succed"
 	
-	read_amb_file(character_amb_path)
+	pmc.select( clear=True )
+	
+	
+def read_character_data(start_frame = -1, end_frame = -1):
+	pmc.select( clear=True )
+	pModel_path = "D:\\Projects\\Meteor\\Game\\Meteor\\pmodel\\"
+	character_amb_path = pModel_path + "character.amb.txt"
+	read_amb_file(character_amb_path, start_frame, end_frame)
 	print "import character amb succed"
 	
-
-
-
-
-
+# main()	
+if __name__ == "__main__":
+	#read_NPC_data(0, False)
+	
+	read_NPC_data(0, False)
+	read_character_data(0, 100)
+	
+	
+	
 
 
