@@ -9,18 +9,6 @@ import pymel.core as pmc
 import pymel.core.datatypes as pmdt
 import maya.api.OpenMaya as OpenMaya
 
-def toQuat(rx, ry, rz, angle):
-	quat = [0,0,0,0]
-	rad = math.radians(angle * 0.5)
-	sinA = math.sin(rad)
-	cosA = math.cos(rad)
-	
-	quat[0] = rx * sinA
-	quat[1] = ry * sinA
-	quat[2] = rz * sinA
-	quat[3]= cosA
-	return quat
-
 def to_PMatrix(mQuat):
 	pMatrix = pmdt.Matrix()
 	mMatrix = mQuat.asMatrix()
@@ -162,31 +150,6 @@ def read_bnc_file(file_path, bone_set):
 			bone_info.bone_quatZ = str2float(line_string[-1])
 			bone_info.bone_quatW = str2float(line_string[-4])
 			
-			# 将根骨骼的移动进行切换，导入的数据是z轴朝上，需要转为Y轴朝上
-			if bone_info.bone_name == "d_base" + bone_set:
-				tmp_pX = bone_info.bone_pivotX
-				tmp_pY = bone_info.bone_pivotY
-				tmp_pZ = bone_info.bone_pivotZ
-				
-				bone_info.bone_pivotX = tmp_pX
-				bone_info.bone_pivotY = tmp_pZ
-				bone_info.bone_pivotZ = -tmp_pY
-				
-				tmp_qX = bone_info.bone_quatX
-				tmp_qY = bone_info.bone_quatY
-				tmp_qZ = bone_info.bone_quatZ
-				
-				if bone_info.bone_quatW == -1:
-					new_quat = toQuat(1.0, 0.0, 0.0, -90.0)
-					bone_info.bone_quatX = new_quat[0]
-					bone_info.bone_quatY = new_quat[1]
-					bone_info.bone_quatZ = new_quat[2]
-					bone_info.bone_quatW = new_quat[3]
-				else:
-					bone_info.bone_quatX = tmp_qX
-					bone_info.bone_quatY = tmp_qZ
-					bone_info.bone_quatZ = -tmp_qY
-				
 			if isBond:
 				line = file.readline()
 				line_string = split_space(line)
@@ -292,31 +255,6 @@ def read_amb_file(amb_path, start_frame = -1, end_frame = -1):
 					d_vec_offset = parse_amb_value(file.readline(), 3)
 					d_quat = parse_amb_value(file.readline(), 4)
 					
-					# 翻转轴向 Z -- Y
-					if di == 0:
-						tmp_pX = d_vec_offset[0]
-						tmp_pY = d_vec_offset[1]
-						tmp_pZ = d_vec_offset[2]
-						
-						d_vec_offset[0] = tmp_pX
-						d_vec_offset[1] = tmp_pZ
-						d_vec_offset[2] = -tmp_pY
-						
-						tmp_qX = d_quat[1]
-						tmp_qY = d_quat[2]
-						tmp_qZ = d_quat[3]
-						
-						if d_quat[0] == -1 and d_quat[1] == 0 and d_quat[2] == 0 and d_quat[3] == 0:
-							new_quat = toQuat(1.0, 0.0, 0.0, -90.0)
-							d_quat[1] = new_quat[0]
-							d_quat[2] = new_quat[1]
-							d_quat[3] = new_quat[2]
-							d_quat[0] = new_quat[3]
-						else:
-							d_quat[1] = tmp_qX
-							d_quat[2] = tmp_qZ
-							d_quat[3] = -tmp_qY
-						
 					dummey_vec_offset.append(d_vec_offset)
 					dummey_quat.append(d_quat)
 					
@@ -436,7 +374,7 @@ def read_skc_file(skc_path, mesh_name):
 			
 			uv = vertex_data[1]
 			uArray.append(uv[0])
-			vArray.append(1.0 - uv[1])
+			vArray.append(uv[1])
 			
 			# bone weights
 			skin_data = vertex_data[2]
@@ -480,7 +418,6 @@ def read_skc_file(skc_path, mesh_name):
 	
 	pmc.select(new_transform)
 	pmc.rename(new_transform, node_name)
-	pmc.rotate(0, -90.0, 0)
 	
 	# skin cluster
 	pmc.select(bone_name_list[0], add = True)
@@ -544,7 +481,6 @@ def read_NPC_data(npc_id, bRead_amb = True):
 	
 	pmc.select( clear=True )
 	
-	
 def read_character_data(start_frame = -1, end_frame = -1):
 	pmc.select( clear=True )
 	pModel_path = "D:\\Projects\\Meteor\\Game\\Meteor\\pmodel\\"
@@ -554,12 +490,10 @@ def read_character_data(start_frame = -1, end_frame = -1):
 	
 # main()	
 if __name__ == "__main__":
-	#read_NPC_data(0, False)
+	#read_NPC_data(13)
 	
 	read_NPC_data(0, False)
-	read_character_data(0, 100)
-	
-	
+	read_character_data()
 	
 
 

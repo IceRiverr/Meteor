@@ -292,7 +292,16 @@ for frame_index in range(0, 17065):
 	pmc.setKeyframe()
 	print frame_index
 
+修改maya的轴向 从
+Switch between Y-up and Z-up
+1 Select Window > Settings/Preferences > Preferences and click on Settings.
+2 Under World Coordinate System, click Y or Z.
 
+窗口--首选项--设置--世界坐标系
+
+
+
+https://forums.autodesk.com/t5/maya-animation-and-rigging/converting-a-rig-from-z-up-to-y-up/td-p/4018806
 
 
 
