@@ -11,3 +11,13 @@ BVH 动画
 
  https://www.youtube.com/watch?v=FDbpHamn2eY&list=PLfWCacrXuIS-EZGldfemhkkfQwPFhAYXd
 Skeleton Assets: Overview | 01 | v4.8 Tutorial Series | Unreal Engine
+
+网格导入缩放比例为 5.08 = 2.54 * 2
+
+https://answers.unrealengine.com/questions/25607/how-to-make-multiple-animation-sequences-from-one.html
+How to make multiple animation sequences from one animation sequence?
+When you import the FBX file you'll see an Animation tab, and Set Range section. You can import multiple animations in a single FBX file like that, going through an import process for each animation of course.
+
+http://www.aboutcg.org/course-list/
+
+http://www.taikr.com/course/354/task/6153/show

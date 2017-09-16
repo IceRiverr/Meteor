@@ -298,6 +298,7 @@ def read_amb_file(amb_path, start_frame = -1, end_frame = -1):
 				
 def parse_mesh_element(str):
 	str = strip_space_line(str)
+	str = str.replace("\t", " ")
 	
 	new_str = ""
 	last_a = ""
@@ -343,7 +344,7 @@ def read_skc_file(skc_path, mesh_name):
 	vertexArray = OpenMaya.MFloatPointArray()
 	uArray = OpenMaya.MFloatArray()
 	vArray = OpenMaya.MFloatArray()
-		
+	
 	polygonCounts = OpenMaya.MIntArray()
 	polygonConnects = OpenMaya.MIntArray()
 	
@@ -458,6 +459,106 @@ def read_skc_file(skc_path, mesh_name):
 		pmc.hyperShade(assign=new_shadinggroup)
 		pmc.select( clear=True )
 
+def read_gmc_data(gmc_path, mesh_name):
+	# first read, get object section
+	file = open(gmc_path, "r")
+	
+	line_num = -1
+	line_nums = []
+		
+	line = file.readline()
+	line_num += 1
+	
+	while True:
+		line = file.readline()
+		line_num += 1
+		
+		if not line:
+			break;
+		
+		line = strip_space_line(line)
+		if line.find("Object") == 0:
+			line_nums.append(line_num)
+			
+	print line_nums
+	
+	file.close()
+	
+	# second read,read section 1
+	vertexArray = OpenMaya.MFloatPointArray()
+	uArray = OpenMaya.MFloatArray()
+	vArray = OpenMaya.MFloatArray()
+	
+	polygonCounts = OpenMaya.MIntArray()
+	polygonConnects = OpenMaya.MIntArray()
+	
+	material_num = 0
+	material_sets = []
+	
+	file = open(gmc_path, "r")
+	line_num = -1
+	
+	line = file.readline()
+	line_num += 1
+	
+	while True:
+		line = file.readline()
+		line_num += 1
+		
+		if not line:
+			break;
+		
+		line = strip_space_line(line)
+		if line_num >= line_nums[0] and line_num < line_nums[1]:
+			
+			if line.find("Vertices") == 0:
+				print line
+			elif line.find("v") == 0:
+				vertex_line = re.split("v|n|c|t",line)
+				vertex_data = []
+				vertex_data.append(parse_mesh_element(vertex_line[1]))
+				vertex_data.append(parse_mesh_element(vertex_line[4]))
+				
+				pos = vertex_data[0]
+				v = OpenMaya.MFloatPoint(pos[0], pos[1], pos[2])
+				vertexArray.append(v)
+				
+				uv = vertex_data[1]
+				uArray.append(uv[0])
+				vArray.append(uv[1])
+				
+			elif line.find("f") == 0:
+				face_line = line[1:]
+				face_data = []
+				face_data = parse_mesh_element(face_line)
+				
+				print face_data
+				
+				polygonCounts.append(3)
+				
+				polygonConnects.append(int(face_data[1]))
+				polygonConnects.append(int(face_data[2]))
+				polygonConnects.append(int(face_data[3]))
+				
+	mFn_Mesh = OpenMaya.MFnMesh()
+	m_DagMod = OpenMaya.MDagModifier()
+	new_object = m_DagMod.createNode('transform')
+	
+	mFn_Mesh.create(vertexArray, polygonCounts, polygonConnects, uArray, vArray, new_object)
+	mFn_Mesh.setName(mesh_name)
+	m_DagMod.doIt()
+	
+	new_mesh = pmc.PyNode(mesh_name)
+	new_transform = pmc.listRelatives(new_mesh, type='transform', parent=True)[0]
+	
+	mFn_Mesh.assignUVs(polygonCounts, polygonConnects, 'map1')
+	
+	node_name = mesh_name + "_mesh"
+	
+	pmc.select(new_transform)
+	pmc.rename(new_transform, node_name)
+	
+	file.close()
 
 def read_NPC_data(npc_id, bRead_amb = True):
 	pModel_path = "D:\\Projects\\Meteor\\Game\\Meteor\\pmodel\\"
@@ -488,12 +589,24 @@ def read_character_data(start_frame = -1, end_frame = -1):
 	read_amb_file(character_amb_path, start_frame, end_frame)
 	print "import character amb succed"
 	
+def read_weapon_data():
+	cModel_path = "D:\\Projects\\Meteor\\Game\\Meteor\\cmodel\\"
+	weapon_name = "w1_0"
+	gmc_path = cModel_path + weapon_name + ".GMC"
+	read_gmc_data(gmc_path, weapon_name)
+	pmc.select( clear=True )
+	
 # main()	
 if __name__ == "__main__":
+	# Read Npc
 	#read_NPC_data(13)
 	
-	read_NPC_data(0, False)
-	read_character_data()
+	# read character
+	#read_NPC_data(0, False)
+	#read_character_data()
+	
+	# read weapon
+	read_weapon_data()
 	
 
 

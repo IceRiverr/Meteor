@@ -38,3 +38,16 @@ Unity/Assets/Meteor/Prefabs/
 Tools/AmbToTxt/Release/
 Tools/AmbToTxt/bin/
 Tools/AmbToTxt/Data/
+*.suo
+UnrealEngine/Meteor/Binaries/
+UnrealEngine/Meteor/Content/Mannequin/
+UnrealEngine/Meteor/Saved/
+UnrealEngine/Meteor/Intermediate/
+UnrealEngine/Meteor/Content/StarterContent/
+UnrealEngine/Meteor/Content/ThirdPerson/
+UnrealEngine/Meteor/Content/Geometry/Meshes/1M_Cube.uasset
+UnrealEngine/Meteor/Content/Geometry/
+UnrealEngine/Meteor/Content/Meteor/Textures/
+UnrealEngine/Meteor/Config/
+UnrealEngine/Meteor/Content/Meteor/Weapons/
+UnrealEngine/Meteor/Content/Meteor/PModels/Character/
