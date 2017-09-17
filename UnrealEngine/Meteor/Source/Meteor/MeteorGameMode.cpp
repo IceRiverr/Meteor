@@ -3,6 +3,7 @@
 #include "Meteor.h"
 #include "MeteorGameMode.h"
 #include "MeteorCharacter.h"
+#include "../UMG/Public/Blueprint/UserWidget.h"
 
 AMeteorGameMode::AMeteorGameMode()
 {
@@ -11,5 +12,19 @@ AMeteorGameMode::AMeteorGameMode()
 	if (PlayerPawnBPClass.Class != NULL)
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
+	}
+}
+
+void AMeteorGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (HUDWidgetClass != nullptr)
+	{
+		UUserWidget* HUDWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
+		if (HUDWidget != nullptr)
+		{
+			HUDWidget->AddToViewport();
+		}
 	}
 }

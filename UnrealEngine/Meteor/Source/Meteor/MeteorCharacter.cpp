@@ -3,6 +3,8 @@
 #include "Meteor.h"
 #include "Kismet/HeadMountedDisplayFunctionLibrary.h"
 #include "MeteorCharacter.h"
+#include "LogMacros.h"
+#include <string>
 
 //////////////////////////////////////////////////////////////////////////
 // AMeteorCharacter
@@ -10,7 +12,7 @@
 AMeteorCharacter::AMeteorCharacter()
 {
 	// Set size for collision capsule
-	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+	GetCapsuleComponent()->InitCapsuleSize(30.f, 90.0f);
 
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
@@ -40,6 +42,69 @@ AMeteorCharacter::AMeteorCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+
+	bEnableMove = true;
+}
+
+void AMeteorCharacter::Tick(float dt)
+{
+	Super::Tick(dt);
+
+	float currentTime = GetWorld()->GetTimeSeconds();
+	
+	//UE_LOG(LogTemp, Warning, TEXT("Time: %f"), time2);
+
+	if (CurrentClickInfo.IsAnyKeyClicked())
+	{
+		CurrentClickInfo.TimeStamp = currentTime;
+		KeyClickArray.PushClickInfo(CurrentClickInfo);
+	}
+
+	// Jump
+	if (bIsJumpKeyClicked)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Jump"));
+	}
+
+	TArray<Meteor::EAttackKey> U_U_AttackKeys;
+	U_U_AttackKeys.Push(Meteor::EAttackKey::ATTACK_UP);
+	U_U_AttackKeys.Push(Meteor::EAttackKey::ATTACK_UP);
+
+	TArray<Meteor::EAttackKey> U_D_AttackKeys;
+	U_D_AttackKeys.Push(Meteor::EAttackKey::ATTACK_UP);
+	U_D_AttackKeys.Push(Meteor::EAttackKey::ATTACK_DOWN);
+
+	TArray<Meteor::EAttackKey> L_U_R_AttackKeys;
+	L_U_R_AttackKeys.Push(Meteor::EAttackKey::ATTACK_LEFT);
+	L_U_R_AttackKeys.Push(Meteor::EAttackKey::ATTACK_UP);
+	L_U_R_AttackKeys.Push(Meteor::EAttackKey::ATTACK_RIGHT);
+
+	if (KeyClickArray.IsKeysDown(currentTime, 0.5f, U_U_AttackKeys))
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Up-Up"));
+	}
+
+	if (bIsAttackKeyClicked)
+	{
+		if (KeyClickArray.IsKeysDown(currentTime, 0.5f, U_D_AttackKeys))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Up-Down-Attack"));
+		}
+		
+		if (KeyClickArray.IsKeysDown(currentTime, 1.0f, L_U_R_AttackKeys))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Left-Right-Up-Attack"));
+		}
+	}
+
+	PostTick(dt);
+}
+
+void AMeteorCharacter::PostTick(float dt)
+{
+	CurrentClickInfo.Clear();
+	bIsAttackKeyClicked = false;
+	bIsJumpKeyClicked = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -49,81 +114,112 @@ void AMeteorCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AMeteorCharacter::OnJumpKeyClicked);
+	
+	PlayerInputComponent->BindAction("Up", IE_Pressed, this, &AMeteorCharacter::OnUpKeyClicked);
+	PlayerInputComponent->BindAction("Down", IE_Pressed, this, &AMeteorCharacter::OnDownKeyClicked);
+	PlayerInputComponent->BindAction("Left", IE_Pressed, this, &AMeteorCharacter::OnLeftKeyClicked);
+	PlayerInputComponent->BindAction("Right", IE_Pressed, this, &AMeteorCharacter::OnRightKeyClicked);
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AMeteorCharacter::OnAttackKeyClicked);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMeteorCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMeteorCharacter::MoveRight);
 
-	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
-	// "turn" handles devices that provide an absolute delta, such as a mouse.
-	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &AMeteorCharacter::TurnAtRate);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &AMeteorCharacter::LookUpAtRate);
-
-	// handle touch devices
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &AMeteorCharacter::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &AMeteorCharacter::TouchStopped);
-
-	// VR headset functionality
-	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AMeteorCharacter::OnResetVR);
+	PlayerInputComponent->BindAxis("Turn", this, &AMeteorCharacter::Turn);
+	PlayerInputComponent->BindAxis("LookUp", this, &AMeteorCharacter::LookUp);
 }
 
-
-void AMeteorCharacter::OnResetVR()
+float AMeteorCharacter::GetHP()
 {
-	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
+	return 30;
 }
 
-void AMeteorCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
+float AMeteorCharacter::GetMP()
 {
-		Jump();
+	return 60;
 }
 
-void AMeteorCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
+void AMeteorCharacter::Turn(float Value)
 {
-		StopJumping();
+	if (bEnableMove)
+	{
+		AddControllerYawInput(Value);
+
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		SetActorRotation(YawRotation);
+	}
 }
 
-void AMeteorCharacter::TurnAtRate(float Rate)
+void AMeteorCharacter::LookUp(float Value)
 {
-	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+	if (bEnableMove)
+	{
+		AddControllerPitchInput(Value);
+	}
 }
 
-void AMeteorCharacter::LookUpAtRate(float Rate)
+void AMeteorCharacter::OnJumpKeyClicked()
 {
-	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	bIsJumpKeyClicked = true;
+}
+
+void AMeteorCharacter::OnUpKeyClicked()
+{
+	CurrentClickInfo.bUpKeyClick = true;
+}
+
+void AMeteorCharacter::OnDownKeyClicked()
+{
+	CurrentClickInfo.bDownKeyClick = true;
+}
+
+void AMeteorCharacter::OnLeftKeyClicked()
+{
+	CurrentClickInfo.bLeftKeyClick = true;
+}
+
+void AMeteorCharacter::OnRightKeyClicked()
+{
+	CurrentClickInfo.bRightKeyClick = true;
+}
+
+void AMeteorCharacter::OnAttackKeyClicked()
+{
+	bIsAttackKeyClicked = true;
 }
 
 void AMeteorCharacter::MoveForward(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f))
+	if (bEnableMove)
 	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		// get forward vector
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+		if ((Controller != NULL) && (Value != 0.0f))
+		{
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			
+			FVector Loc = GetActorLocation();
+			Loc += (1.0f) * Direction * Value;
+			SetActorLocation(Loc);
+		}
 	}
 }
 
 void AMeteorCharacter::MoveRight(float Value)
 {
-	if ( (Controller != NULL) && (Value != 0.0f) )
+	if (bEnableMove)
 	{
-		// find out which way is right
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
-		// get right vector 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		// add movement in that direction
-		AddMovementInput(Direction, Value);
+		if ((Controller != NULL) && (Value != 0.0f))
+		{
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+			
+			FVector Loc = GetActorLocation();
+			Loc += (1.0f) * Direction * Value;
+			SetActorLocation(Loc);
+		}
 	}
 }

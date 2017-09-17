@@ -10,7 +10,11 @@ class AMeteorGameMode : public AGameModeBase
 
 public:
 	AMeteorGameMode();
+
+	virtual void BeginPlay() override;
+public:
+	/** HUD class this game uses. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Meteor")
+	TSubclassOf<class UUserWidget> HUDWidgetClass;
 };
-
-
 

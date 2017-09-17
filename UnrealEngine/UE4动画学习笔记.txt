@@ -20,4 +20,34 @@ When you import the FBX file you'll see an Animation tab, and Set Range section.
 
 http://www.aboutcg.org/course-list/
 
-http://www.taikr.com/course/354/task/6153/show
+
+blueprint.com
+直接copy蓝图，贴到文本文件中，可以保存蓝图，可以共享蓝图
+
+打包
+Packaging
+添加 list of maps to include in a packaged build
+
+GameInstance 
+在level切换过程中还想要保存的数据，可以保存在这里
+
+GamePlayStatics
+蓝图静态类
+
+Object->Actor+Component->Level->World->WorldContext->GameInstance->Engine
+
+有限状态机
+
+分层状态机
+
+行为树
+
+GOAL
+
+PlayerState实际上表达的是当前关卡的玩家得分等数据
+
+那些跨关卡的统计数据等就也不应该放进PlayerState里了，应该放在外面的GameInstance，然后用SaveGame保存起来
+
+
+
+
