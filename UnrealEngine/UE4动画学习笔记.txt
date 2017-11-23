@@ -49,5 +49,91 @@ PlayerState实际上表达的是当前关卡的玩家得分等数据
 那些跨关卡的统计数据等就也不应该放进PlayerState里了，应该放在外面的GameInstance，然后用SaveGame保存起来
 
 
+AnimationBlueprient 
+父类AnimInstance
+
+http://blog.csdn.net/neil3d
+
+
+API 总结
+AddMovementInput(GetActorForwardVector(), Value);
+	GetActorForwardVector() 会调用基类AActor中的函数，其会转发到RootComponent的FTransform结构中，其返回的是世界空间的方向
+	
+下面的操作可以俯视掉移动的输入
+if (Controller)
+	Controller->SetIgnoreMoveInput(true);
+
+// 可以忽视掉Look的按键操作
+void APlayerController::AddYawInput(float Val)
+{
+	RotationInput.Yaw += !IsLookInputIgnored() ? Val * InputYawScale : 0.f;
+}
+// 以下的操作都可以
+void AController::SetIgnoreLookInput(bool bNewLookInput)
+void AController::ResetIgnoreLookInput() 
+
+
+/**
+ * Object within PlayerController that processes player input.
+ * Only exists on the client in network games.
+ *
+ * @see https://docs.unrealengine.com/latest/INT/Gameplay/Input/index.html
+ */
+ // 一般是PlayerCOntroller的一个尘缘
+class ENGINE_API UPlayerInput : public UObject
+
+// 检测按键是否按下
+bool APlayerController::IsInputKeyDown(const FKey Key) const
+
+动画系统使用拉模型来获取条件，然后进行自身状态的切换
+如果动画需要根据动画的状态来通知游戏状态的变化，需要进行通知；怎么写通知；
+
+UInputComponent 用来对应UplayerInput的键盘绑定
+
+Controller接受 Input，然后产生具体的移动，或者其他操作
+
+CharacterMovement 保存具体的移动信息
+
+void AFirstPersonBaseCodeCharacter::MoveForward(float Value)
+{
+    if ( (Controller != NULL) && (Value != 0.0f) )
+    {
+        // find out which way is forward
+        FRotator Rotation = Controller->GetControlRotation();
+        // Limit pitch when walking or falling
+        if ( CharacterMovement->IsMovingOnGround() || CharacterMovement->IsFalling() )
+        {
+            Rotation.Pitch = 0.0f;
+        }
+        // add movement in that direction
+        const FVector Direction = FRotationMatrix(Rotation).GetScaledAxis(EAxis::X);
+        AddMovementInput(Direction, Value);
+    }
+}
+
+
+2017年9月25日
+在导入动画时，千万不要缩放动画，不然rootmotion会不准
+如果模型大小太小，可以到CharacterMesh中直接缩放，没有问题，
+
+Root Motion translation scale issue?
+https://answers.unrealengine.com/questions/372897/root-motion-translation-scale-issue.html
+
+
+动画立即返回
+bNeedReturn
+
+左右移动，前后移动，跳跃移动
+地面招式
+跳跃招式
+爬墙
+给地图设定影藏点，就像武侠小说中，人物可以隐藏在房屋的横梁上
+
+守望先锋有这个机制，
+
+meteor的播放速度是每秒 30帧
+
+动画立即退出
+
 
 

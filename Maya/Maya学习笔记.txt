@@ -308,13 +308,70 @@ https://forums.autodesk.com/t5/maya-animation-and-rigging/converting-a-rig-from-
 
 
 
+	
+	
+import pymel.core as pmc
+import pymel.core.datatypes as pmdt
 
+pmc.select("d_base")
 
+for frame_index in range(0, 650):
+	pmc.currentTime(int(frame_index))
+	
+	pmc.select("d_base")
+	transX = pmc.getAttr("d_base.translateX")
+	transY = pmc.getAttr("d_base.translateY")
+	transZ = pmc.getAttr("d_base.translateZ")
+	
+	pmc.select("b")
+	b_transX = pmc.getAttr("b.translateX")
+	b_transY = pmc.getAttr("b.translateY")
+	b_transZ = pmc.getAttr("b.translateZ")
+	
+	print "{"
+	print frame_index
+	
+	print transX
+	print transY
+	print transZ
+	
+	print b_transX
+	print b_transY
+	print b_transZ
+	
+	print "}"
+	
+	#pmc.select("d_base")
+	#pmc.xform(t = (b_transX, b_transY, transZ))
+	
+	#pmc.select("b")
+	#pmc.xform(t = (transX, transY, transZ))
+	
+	#pmc.setKeyframe()
+	#print frame_index
+	
 
+	pmc.currentTime(int(frame_index))
+	pmc.select(bone.bone_name)
+	pmc.xform(matrix = maya_mat)
+	pmc.setKeyframe()
+	
+	
+# modify jump base move
+import pymel.core as pmc
+import pymel.core.datatypes as pmdt
 
+pmc.select("d_base")
 
-
-
+for frame_index in range(655, 669 + 1):
+	
+	pmc.currentTime(int(frame_index))
+	pmc.select("d_base")
+	pmc.xform(t = (0, 0, 0))
+	pmc.setKeyframe()
+	
+	print frame_index
+	
 
 
 

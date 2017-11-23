@@ -20,7 +20,9 @@ public:
 	AMeteorCharacter();
 
 	virtual void Tick(float dt) override;
+	void PreTick(float dt);
 	void PostTick(float dt);
+
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
@@ -54,6 +56,10 @@ protected:
 
 	void OnAttackKeyClicked();
 
+	bool TestSprintMovement(float dt, float currentTime);
+
+	bool TestFireSkill(float dt, float currentTime);
+
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
@@ -69,10 +75,60 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Meteor")
 	float GetMP();
 
+	UFUNCTION(BlueprintCallable, Category = "Meteor")
+	void AddAttackPoint(int atk);
+
+	// 2 fwd -2 bwd 1 right -1 left
+	UFUNCTION(BlueprintCallable, Category = "Meteor")
+	int GetMoveSprintDirection(); 
+
+	UFUNCTION(BlueprintCallable, Category = "Meteor")
+	bool GetIsAttackKeyDown();
+
+	UFUNCTION(BlueprintCallable, Category = "Meteor")
+	void SetJumpSetFlag(bool flag);
+
+	UFUNCTION(BlueprintCallable, Category = "Meteor")
+	bool GetJumpSetFlag();
+
+	UFUNCTION(BlueprintCallable, Category = "Meteor")
+	void SetCanInputAttackKey(bool attack);
+
+	UFUNCTION(BlueprintCallable, Category = "Meteor")
+	bool GetCanInputAttackKey();
+
+	UFUNCTION(BlueprintCallable, Category = "Meteor")
+	ECombooKey::Type GetCombooKey();
+
 private:
 	AttackKeyClickInfo CurrentClickInfo;
 	AttackKeyClickArray KeyClickArray;
 
-	bool bIsAttackKeyClicked;
 	bool bIsJumpKeyClicked;
+	
+	bool bIsSpringFwd;
+	float sprintFwdTime;
+	float sprintFwdStampTime;
+
+	bool bIsSpringBwd;
+	float sprintBwdTime;
+	float sprintBwdStampTime;
+
+	bool bIsSpringRight;
+	float sprintRightTime;
+	float sprintRightStampTime;
+
+	bool bIsSpringLeft;
+	float sprintLeftTime;
+	float sprintLeftStampTime;
+
+	float moveFwdSpeedModifier;
+	float moveBwdSpeedModifier;
+	float moveRightSpeedModifier;
+
+	bool bIsAttackKeyDown;
+
+	bool bJumpSetFlag;
+
+	bool bCanInputAttackKey;
 };

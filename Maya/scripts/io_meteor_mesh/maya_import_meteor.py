@@ -1,5 +1,9 @@
 # -*- coding:utf-8 -*-  
 
+
+# by IceRiver
+# maya 2017
+
 import os
 import sys
 import math
@@ -73,7 +77,7 @@ bone_name_list = []
 num_bones = 0
 num_dummey = 0
 
-def read_bnc_file(file_path, bone_set):
+def read_bnc_file(scale_rate, file_path, bone_set):
 	file = open(file_path, "r")
 	
 	while True:
@@ -138,9 +142,9 @@ def read_bnc_file(file_path, bone_set):
 			
 			line = file.readline()
 			line_string = split_space(line)
-			bone_info.bone_pivotX = str2float(line_string[-3])
-			bone_info.bone_pivotY = str2float(line_string[-2])
-			bone_info.bone_pivotZ = str2float(line_string[-1])
+			bone_info.bone_pivotX = str2float(line_string[-3]) * scale_rate
+			bone_info.bone_pivotY = str2float(line_string[-2]) * scale_rate
+			bone_info.bone_pivotZ = str2float(line_string[-1]) * scale_rate
 			
 			# bnc 中的四元数 格式为 wxyz 需要转为 xyzw
 			line = file.readline()
@@ -215,7 +219,7 @@ def parse_amb_value(line, num):
 		value_arr.append(float(value_strs[n - num]))
 	return value_arr
 	
-def read_amb_file(amb_path, start_frame = -1, end_frame = -1):
+def read_amb_file(scale_rate, amb_path, start_frame = -1, end_frame = -1):
 	file = open(amb_path, "r")
 	
 	line = file.readline()
@@ -240,6 +244,10 @@ def read_amb_file(amb_path, start_frame = -1, end_frame = -1):
 				
 				# base offset
 				vec_offset = parse_amb_value(file.readline(), 3)
+				vec_offset[0] *= scale_rate
+				vec_offset[1] *= scale_rate
+				vec_offset[2] *= scale_rate
+				
 				bone_quat = []
 				dummey_vec_offset = []
 				dummey_quat = []
@@ -253,6 +261,10 @@ def read_amb_file(amb_path, start_frame = -1, end_frame = -1):
 				for di in range(0, 6):
 					line = file.readline()
 					d_vec_offset = parse_amb_value(file.readline(), 3)
+					d_vec_offset[0] *= scale_rate
+					d_vec_offset[1] *= scale_rate
+					d_vec_offset[2] *= scale_rate
+					
 					d_quat = parse_amb_value(file.readline(), 4)
 					
 					dummey_vec_offset.append(d_vec_offset)
@@ -336,7 +348,7 @@ def parse_face(line):
 	face_data = parse_mesh_element(face_line)
 	return face_data
 	
-def read_skc_file(skc_path, mesh_name):
+def read_skc_file(scale_rate, skc_path, mesh_name):
 	file = open(skc_path, "r")
 	
 	line = file.readline()
@@ -370,6 +382,9 @@ def read_skc_file(skc_path, mesh_name):
 		elif line[0] == "v":
 			vertex_data = parse_pos_uv_weight(line)
 			pos = vertex_data[0]
+			pos[0] *= scale_rate
+			pos[1] *= scale_rate
+			pos[2] *= scale_rate
 			v = OpenMaya.MFloatPoint(pos[0], pos[1], pos[2])
 			vertexArray.append(v)
 			
@@ -459,7 +474,7 @@ def read_skc_file(skc_path, mesh_name):
 		pmc.hyperShade(assign=new_shadinggroup)
 		pmc.select( clear=True )
 
-def read_gmc_data(gmc_path, mesh_name):
+def read_gmc_data(scale_rate, gmc_path, mesh_name):
 	# first read, get object section
 	file = open(gmc_path, "r")
 	
@@ -520,6 +535,10 @@ def read_gmc_data(gmc_path, mesh_name):
 				vertex_data.append(parse_mesh_element(vertex_line[4]))
 				
 				pos = vertex_data[0]
+				pos[0] *= scale_rate
+				pos[1] *= scale_rate
+				pos[2] *= scale_rate
+				
 				v = OpenMaya.MFloatPoint(pos[0], pos[1], pos[2])
 				vertexArray.append(v)
 				
@@ -560,53 +579,58 @@ def read_gmc_data(gmc_path, mesh_name):
 	
 	file.close()
 
-def read_NPC_data(npc_id, bRead_amb = True):
+def read_NPC_data(scale_rate, npc_id, bRead_amb = True):
 	pModel_path = "D:\\Projects\\Meteor\\Game\\Meteor\\pmodel\\"
+	#pModel_path = "D:\\Projects\\Meteor\\Maya\\assets\\XLX\\"
 	
 	bnc_path = pModel_path + "P{0}.bnc".format(int(npc_id))
 	skc_path = pModel_path + "p{0}.skc".format(int(npc_id))
 	mesh_name = "p{0}".format(int(npc_id))
 	amb_path = pModel_path + "p{0}.amb.txt".format(int(npc_id))
 		
-	read_bnc_file(bnc_path, "")
+	read_bnc_file(scale_rate, bnc_path, "")
 	print "import bnc succed"
 	
 	pmc.select( clear=True )
-	read_skc_file(skc_path, mesh_name)
+	read_skc_file(scale_rate, skc_path, mesh_name)
 	print "import skc succed"
 	
 	# 注意先后顺序，必须放在后面
 	if bRead_amb:
-		read_amb_file(amb_path)
+		read_amb_file(scale_rate, amb_path)
 		print "import amb succed"
 	
 	pmc.select( clear=True )
 	
-def read_character_data(start_frame = -1, end_frame = -1):
+def read_character_data(scale_rate, start_frame = -1, end_frame = -1):
 	pmc.select( clear=True )
 	pModel_path = "D:\\Projects\\Meteor\\Game\\Meteor\\pmodel\\"
 	character_amb_path = pModel_path + "character.amb.txt"
-	read_amb_file(character_amb_path, start_frame, end_frame)
+	read_amb_file(scale_rate, character_amb_path, start_frame, end_frame)
 	print "import character amb succed"
 	
-def read_weapon_data():
+def read_weapon_data(scale_rate):
 	cModel_path = "D:\\Projects\\Meteor\\Game\\Meteor\\cmodel\\"
-	weapon_name = "w1_0"
-	gmc_path = cModel_path + weapon_name + ".GMC"
-	read_gmc_data(gmc_path, weapon_name)
-	pmc.select( clear=True )
+	#weapon_name = "w5_0"
+	weapon_names = ["w5_0", "w5_1", "w5_2", "w5_3", "w5_4"]
+	for name in weapon_names:
+		gmc_path = cModel_path + name + ".GMC"
+		read_gmc_data(scale_rate, gmc_path, name)
+		pmc.select( clear=True )
 	
-# main()	
+# main()
 if __name__ == "__main__":
+	scale_rate = 4.8
 	# Read Npc
-	#read_NPC_data(13)
+	#read_NPC_data(scale_rate, 0)
 	
 	# read character
-	#read_NPC_data(0, False)
-	#read_character_data()
+	#read_NPC_data(scale_rate, 0, False)
+	#read_character_data(scale_rate)
 	
 	# read weapon
-	read_weapon_data()
+	read_weapon_data(scale_rate)
 	
-
+	#read_NPC_data(0, False)
+	
 

@@ -7,10 +7,10 @@ namespace Meteor
 {
 	enum EAttackKey
 	{
-		ATTACK_UP,
+		ATTACK_UP = 0,
 		ATTACK_DOWN,
-		ATTACK_LEFT,
 		ATTACK_RIGHT,
+		ATTACK_LEFT,
 	};
 }
 
@@ -46,3 +46,17 @@ private:
 	int numMaxRecords;
 
 };
+
+UENUM(BlueprintType)
+namespace ECombooKey
+{
+	enum Type
+	{
+		COM_INVALID,
+		COM_A,
+		COM_U_A,
+		COM_D_A,
+		COM_L_A,
+		COM_R_A,
+	};
+}
