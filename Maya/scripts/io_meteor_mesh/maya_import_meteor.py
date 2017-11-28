@@ -451,6 +451,9 @@ def read_skc_file(scale_rate, skc_path, mesh_name):
 	material_ends = []
 	mesh_selcte_sets = []
 	
+	material_sets = filter(lambda x: x != 0, material_sets)
+	print material_sets
+	
 	material_starts.append(0)
 	material_ends.append(material_sets[0] - 1)
 	mesh_selcte_sets.append(node_name + ".f[{0}:{1}]".format(int(material_starts[0]), int(material_ends[0])))
@@ -458,7 +461,7 @@ def read_skc_file(scale_rate, skc_path, mesh_name):
 		material_starts.append(material_ends[int(i-1)] + 1)
 		material_ends.append(material_ends[int(i-1)] + material_sets[i])
 		mesh_selcte_sets.append(node_name + ".f[{0}:{1}]".format(int(material_starts[i]), int(material_ends[i])))
-	
+		
 	print mesh_selcte_sets
 	
 	# 没有这一句会出错，必须将以前的选择清理掉
@@ -622,14 +625,14 @@ def read_weapon_data(scale_rate):
 if __name__ == "__main__":
 	scale_rate = 4.8
 	# Read Npc
-	#read_NPC_data(scale_rate, 0)
+	read_NPC_data(scale_rate, 19)
 	
 	# read character
 	#read_NPC_data(scale_rate, 0, False)
 	#read_character_data(scale_rate)
 	
 	# read weapon
-	read_weapon_data(scale_rate)
+	#read_weapon_data(scale_rate)
 	
 	#read_NPC_data(0, False)
 	

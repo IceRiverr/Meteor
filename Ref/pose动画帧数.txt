@@ -1,0 +1,26 @@
+# 2017年11月28日
+# By IceRiver
+
+# 各个amb文件包含的帧数，方便maya中导出fbx动画时设置
+
+character	frames = 17061
+p0			frames = 650
+p1			frames = 1058
+p2			frames = 630
+p3			frames = 584
+p4			frames = 640
+p5			frames = 640
+p6			frames = 603
+p7			frames = 640
+p8			frames = 600
+p9			frames = 605
+p10			frames = 1051
+p11			frames = 605
+p12			frames = 605
+p13			frames = 1063
+p14			frames = 605
+p15			frames = 620
+p16			frames = 640
+p17			frames = 1074
+p18			frames = 630
+p19			frames = 605

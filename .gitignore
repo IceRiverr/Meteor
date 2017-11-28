@@ -52,3 +52,15 @@ UnrealEngine/Meteor/Config/
 UnrealEngine/Meteor/Content/Meteor/Weapons/
 UnrealEngine/Meteor/Content/Meteor/PModels/Character/
 UnrealEngine/Meteor/Content/Meteor/UI/Textures/
+Other/
+UnrealEngine/Meteor/Content/Meteor/PModels/P0/Animations/
+UnrealEngine/Meteor/Content/Meteor/PModels/XLX/
+UnrealEngine/Meteor/Content/Test/
+UnrealEngine/TestGame/Content/StarterContent/
+UnrealEngine/TestGame/Intermediate/Build/
+UnrealEngine/TestGame/Intermediate/
+UnrealEngine/TestGame/
+UnrealEngine/Meteor/Content/Meteor/PModels/P0/P0_Animations/
+*.uasset
+Tools/PoseToJson/PoseToJson/x64/
+Tools/PoseToJson/TestTree/
