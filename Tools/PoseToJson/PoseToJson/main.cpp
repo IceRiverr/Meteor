@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 	TEST_parse_pose();
 	//TEST_Node();
 	//TEST_Json2();
-	TEST_first_letter_Upper();
+	//TEST_first_letter_Upper();
 	
 	qDebug() << "End";
 	//getchar();

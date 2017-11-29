@@ -106,19 +106,20 @@ void convert_tree_to_json(Node* node, QJsonObject* jsonObj, PoseContext& context
 	if (node == nullptr)
 		return;
 
+	// 收集子节点信息
 	QJsonObject obj;
 	PoseContext con;
-
 	if (node->children.length() > 0)
 	{
 		for (int i = 0; i < node->children.length(); ++i)
 		{
-			convert_tree_to_json(node->children.at(i), &obj, context);
+			convert_tree_to_json(node->children.at(i), &obj, con);
 		}
 	}
 
 	if (node->pair.type == VALUE_OBJ)
 	{
+		// 如果是需要合并成数组的节点，则添加进 context
 		if (QString::compare(node->pair.key, "action", Qt::CaseInsensitive) == 0 || 
 			QString::compare(node->pair.key, "blend", Qt::CaseInsensitive) == 0)
 		{
@@ -132,13 +133,22 @@ void convert_tree_to_json(Node* node, QJsonObject* jsonObj, PoseContext& context
 		{
 			context.dragArr.push_back(obj);
 		}
-		else if(QString::compare(node->pair.key, "pose", Qt::CaseInsensitive) == 0)
-		{
-			jsonObj->insert(node->pair.key, obj);
-			//jsonObj->insert(node->pair.key, node->pair.value);
-		}
 		else
 		{
+			// 进行最后的插入
+			if (!con.actionArr.isEmpty())
+			{
+				obj.insert("Action&Blend", con.actionArr);
+			}
+			if (!con.attackArr.isEmpty())
+			{
+				obj.insert("Attack", con.attackArr);
+			}
+			if (!con.dragArr.isEmpty())
+			{
+				obj.insert("Drag", con.dragArr);
+			}
+
 			jsonObj->insert(node->pair.key, obj);
 		}
 	}
