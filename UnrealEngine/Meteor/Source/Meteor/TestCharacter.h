@@ -3,8 +3,10 @@
 #pragma once
 
 #include "Animation/AnimMontage.h"
-
 #include "GameFramework/Character.h"
+#include "Engine/DataTable.h"
+#include "Engine/StreamableManager.h"
+
 #include "TestCharacter.generated.h"
 
 UCLASS()
@@ -65,6 +67,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	bool bPose321BlendOut;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	TAssetPtr<UDataTable> dataTable;
 private:
 	FString currentToEndMontageName;
 
@@ -74,4 +78,6 @@ private:
 	bool bStartTransform;
 	FAlphaBlend tmpBlend;
 	float Pose315_NextPose_Time;
+
+	FStreamableManager StreamMgr;
 };
