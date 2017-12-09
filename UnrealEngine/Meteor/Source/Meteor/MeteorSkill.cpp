@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Meteor.h"
 #include "MeteorSkill.h"
+#include "Meteor.h"
 #include <string>
 
 MeteorSkill::MeteorSkill()

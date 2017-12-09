@@ -5,21 +5,9 @@ using System.Collections.Generic;
 
 public class MeteorEditorTarget : TargetRules
 {
-	public MeteorEditorTarget(TargetInfo Target)
+	public MeteorEditorTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
-	}
-
-	//
-	// TargetRules interface.
-	//
-
-	public override void SetupBinaries(
-		TargetInfo Target,
-		ref List<UEBuildBinaryConfiguration> OutBuildBinaryConfigurations,
-		ref List<string> OutExtraModuleNames
-		)
-	{
-		OutExtraModuleNames.Add("Meteor");
+		ExtraModuleNames.Add("Meteor");
 	}
 }

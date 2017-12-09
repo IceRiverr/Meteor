@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Meteor.h"
 #include "TestCharacter.h"
+#include "Meteor.h"
 #include "Animation/AnimInstance.h"
 
 // Sets default values

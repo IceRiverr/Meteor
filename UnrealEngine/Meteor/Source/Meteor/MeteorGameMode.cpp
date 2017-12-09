@@ -1,7 +1,7 @@
 // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
-#include "Meteor.h"
 #include "MeteorGameMode.h"
+#include "Meteor.h"
 #include "MeteorCharacter.h"
 #include "../UMG/Public/Blueprint/UserWidget.h"
 

@@ -4,10 +4,10 @@ using UnrealBuildTool;
 
 public class Meteor : ModuleRules
 {
-	public Meteor(TargetInfo Target)
+	public Meteor(ReadOnlyTargetRules Target) : base(Target)
 	{
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs; // If Input Error
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "UMG" });
 		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
-
 	}
 }

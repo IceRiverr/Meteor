@@ -1,8 +1,8 @@
 // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
-#include "Meteor.h"
-#include "Kismet/HeadMountedDisplayFunctionLibrary.h"
 #include "MeteorCharacter.h"
+#include "Meteor.h"
+//#include "Kismet/HeadMountedDisplayFunctionLibrary.h"
 #include "LogMacros.h"
 #include <string>
 
