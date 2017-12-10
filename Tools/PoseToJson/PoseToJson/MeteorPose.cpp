@@ -211,6 +211,9 @@ bool check_is_key_value(const QString& src, QFile& file, KeyValuePair& keyValue)
 			boneNames.replace(QRegExp("\""), "");
 			boneNames = boneNames.simplified();
 
+			boneNames.replace(" ", "_");
+			boneNames.replace(",", "|");
+
 			keyValue = KeyValuePair(VALUE_BONE, bone, boneNames);
 			return true;
 		}
@@ -230,6 +233,20 @@ void write_json_array(const QJsonArray& array, const QString& jsonPath)
 	}
 
 	file.write(jsonByte);
+	file.close();
+}
+
+void write_text_to_file(const QString text, const QString& path)
+{
+	QFile file(path);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		qDebug() << "Open file failed";
+		return;
+	}
+	QTextStream csvStrem(&file);
+
+	csvStrem << text << endl;
 	file.close();
 }
 
@@ -372,7 +389,13 @@ bool parse_jsonObj_to_float(QJsonObject& obj, const QString& key, float& val)
 	return false;
 }
 
-int remove_start_frame(const QString& jsonPath, const QString& correctPath, const QString& removeStartFramePath)
+int remove_start_frame(
+	const QString& jsonPath,
+	const QString& correctPath,
+	const QString& removeStartFramePath,
+	const QString& attackCSVPath,
+	const QString& npcExportSectionPath,
+	const QString& characterExportSectionPath)
 {
 	QFile poseFile(jsonPath);
 	if (!poseFile.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -392,7 +415,6 @@ int remove_start_frame(const QString& jsonPath, const QString& correctPath, cons
 		if (doc.isArray())
 		{
 			QJsonArray arr = doc.array();
-			qDebug() << arr.count() << endl;
 
 			QVector<MeteorPoseDefine> PoseDefines;
 			for (auto it = arr.begin(); it != arr.end(); ++it)
@@ -413,28 +435,70 @@ int remove_start_frame(const QString& jsonPath, const QString& correctPath, cons
 					}
 				}
 			}
-			qDebug() << PoseDefines.length() << endl;
+			qDebug() << "Pose Count:" << PoseDefines.length() << endl;
 
 			// correctPath
-			QJsonArray correctPoseArr;
-			for (int i = 0; i < PoseDefines.length(); ++i)
 			{
-				QJsonObject poseObj;
-				PoseDefines[i].ToJson(poseObj);
-				correctPoseArr.push_back(poseObj);
+				QJsonArray correctPoseArr;
+				for (int i = 0; i < PoseDefines.length(); ++i)
+				{
+					QJsonObject poseObj;
+					PoseDefines[i].ToJson(poseObj);
+					correctPoseArr.push_back(poseObj);
+				}
+				write_json_array(correctPoseArr, correctPath);
+				qDebug() << "write correct JSON succeed!";
 			}
-			write_json_array(correctPoseArr, correctPath);
 
-			// dec first frame
-			QJsonArray removeStartFramePoseArr;
-			for (int i = 0; i < PoseDefines.length(); ++i)
+			// write NPC export file
 			{
-				QJsonObject poseObj;
-				PoseDefines[i].RemoveFirstFrame();
-				PoseDefines[i].ToJson(poseObj);
-				removeStartFramePoseArr.push_back(poseObj);
+				QString npcSec1, npcSec2;
+				int npcIndex = 0;
+				for (int i = 0; i < PoseDefines.length(); ++i)
+				{
+					PoseDefines[i].ToMayaExportSection(MeteorPoseDefine::FROM_NPC, npcIndex, npcSec1, npcSec2);
+				}
+				write_text_to_file(npcSec1 + npcSec2, npcExportSectionPath);
+				qDebug() << "write NPCExportSection succeed!";
 			}
-			write_json_array(removeStartFramePoseArr, removeStartFramePath);
+
+			// write export file
+			{
+				QString characterSec1, characterSec2;
+				int characterIndex = 0;
+				for (int i = 0; i < PoseDefines.length(); ++i)
+				{
+					PoseDefines[i].ToMayaExportSection(MeteorPoseDefine::FROM_CHARACTER, characterIndex, characterSec1, characterSec2);
+				}
+				write_text_to_file(characterSec1 + characterSec2, characterExportSectionPath);
+				qDebug() << "write characterExportSection succeed!";
+			}
+
+			// remove first frame
+			{
+				QJsonArray removeStartFramePoseArr;
+				for (int i = 0; i < PoseDefines.length(); ++i)
+				{
+					QJsonObject poseObj;
+					PoseDefines[i].RemoveFirstFrame();
+					PoseDefines[i].ToJson(poseObj);
+					removeStartFramePoseArr.push_back(poseObj);
+				}
+				write_json_array(removeStartFramePoseArr, removeStartFramePath);
+				qDebug() << "write remove start frame json succeed!";
+			}
+
+			// write attackPaht
+			{
+				QString csvStr;
+				csvStr += MeteorPoseDefine::PoseAttack::GetCSVHeader();
+				for (int i = 0; i < PoseDefines.length(); ++i)
+				{
+					PoseDefines[i].ToAttackCSVString(csvStr);
+				}
+				write_text_to_file(csvStr, attackCSVPath);
+				qDebug() << "write attack csv succeed!";
+			}
 		}
 	}
 	return 0;
@@ -819,7 +883,7 @@ bool MeteorPoseDefine::ToAttackCSVString(QString& csv)
 	{
 		for (int i = 0; i < PoseAttacks.length(); ++i)
 		{
-			QString key = QString("%1.%2").arg(this->PoseIndex).arg(i);
+			QString key = QString("%1.%2").arg(this->PoseIndex).arg(i+1);
 			const PoseAttack& attack = PoseAttacks[i];
 			csv += attack.ToCSV(key);
 		}
@@ -828,15 +892,69 @@ bool MeteorPoseDefine::ToAttackCSVString(QString& csv)
 	return false;
 }
 
+// Maya export
+//blendAttrStr "animClips[0].animClipName" "Pose_0_idle";
+//blendAttr "animClips[0].animClipStart" 1;
+//blendAttr "animClips[0].animClipEnd" 65;
+//blendAttr "animClips[0].exportAnimClip" 1;
+//blendAttr "animClips[0].animClipId" 0;
+bool MeteorPoseDefine::ToMayaExportSection(SourceType type, int& index, QString& sec1, QString& sec2)
+{
+	if (this->Source == type)
+	{
+		if (this->Start != -1 && this->End != -1)
+		{
+			sec1 += QString("blendAttrStr \"animClips[%1].animClipName\" \"Pose_%2\";\n").arg(index).arg(this->PoseIndex);
+
+			sec2 += QString("blendAttr \"animClips[%1].animClipStart\" %2;\n").arg(index).arg(this->Start);
+			sec2 += QString("blendAttr \"animClips[%1].animClipEnd\" %2;\n").arg(index).arg(this->End);
+			sec2 += QString("blendAttr \"animClips[%1].exportAnimClip\" 1;\n").arg(index);
+			sec2 += QString("blendAttr \"animClips[%1].animClipId\" 0;\n").arg(index);
+
+			index++;
+		}
+
+		if(this->LoopStart != -1 && this->LoopEnd != -1 && this->LoopStart != this->LoopEnd && (this->LoopStart > this->Start || this->LoopEnd < this->LoopEnd))
+		{
+			sec1 += QString("blendAttrStr \"animClips[%1].animClipName\" \"Pose_%2_Loop\";\n").arg(index).arg(this->PoseIndex);
+
+			sec2 += QString("blendAttr \"animClips[%1].animClipStart\" %2;\n").arg(index).arg(this->LoopStart);
+			sec2 += QString("blendAttr \"animClips[%1].animClipEnd\" %2;\n").arg(index).arg(this->LoopEnd);
+			sec2 += QString("blendAttr \"animClips[%1].exportAnimClip\" 1;\n").arg(index);
+			sec2 += QString("blendAttr \"animClips[%1].animClipId\" 0;\n").arg(index);
+			index++;
+		}
+		return true;
+	}
+	return false;
+}
+
+MeteorPoseDefine::PoseAttack::PoseAttack()
+{
+	this->Bone = "";
+	this->Start = -1;
+	this->End = -1;
+	this->AttackType = -1;
+	this->CheckFriend = -1;
+	this->DefenseValue = 0.0f;
+	this->DefenseMove = -1;
+	this->TargetValue = 0.0f;
+	this->TargetMove = -1;
+	this->TargetPose = -1;
+	this->TargetPoseFront = -1;
+	this->TargetPoseBack = -1;
+	this->TargetPoseLeft = -1;
+	this->TargetPoseRight = -1;
+}
+
 QString MeteorPoseDefine::PoseAttack::ToCSV(const QString& key) const
 {
 	QString boneString = this->Bone;
-	boneString.replace(" ", "_");
-	boneString.replace(",", "|");
+	//boneString.replace(" ", "_");
+	//boneString.replace(",", "|");
 	
 	QString csvStr = QString("%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,%11,%12,%13,%14,%15\n")
 		.arg(key)
-		.arg(boneString)
 		.arg(Start)
 		.arg(End)
 		.arg(AttackType)
@@ -849,6 +967,13 @@ QString MeteorPoseDefine::PoseAttack::ToCSV(const QString& key) const
 		.arg(TargetPoseFront)
 		.arg(TargetPoseBack)
 		.arg(TargetPoseLeft)
-		.arg(TargetPoseRight);
+		.arg(TargetPoseRight)
+		.arg(boneString);
 	return csvStr;
+}
+
+QString MeteorPoseDefine::PoseAttack::GetCSVHeader()
+{
+	QString header = QString(",Start,End,AttackType,CheckFriend,DefenseValue,DefenseMove,TargetValue,TargetMove,TargetPose,TargetPoseFront,TargetPoseBack,TargetPoseLeft,TargetPoseRight,Bone\n");
+	return header;
 }

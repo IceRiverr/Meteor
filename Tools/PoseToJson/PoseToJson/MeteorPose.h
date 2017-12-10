@@ -38,7 +38,13 @@ struct KeyValuePair
 
 int parse_meteor_pose(const QString& posePath, const QString& jsonPath);
 
-int remove_start_frame(const QString& jsonPath, const QString& correctPath, const QString& removeStartFramePath);
+int remove_start_frame(
+	const QString& jsonPath, 
+	const QString& correctPath, 
+	const QString& removeStartFramePath,
+	const QString& attackCSVPath,
+	const QString& npcExportSectionPath,
+	const QString& characterExportSectionPath);
 
 class Node
 {
@@ -58,22 +64,15 @@ public:
 	KeyValuePair pair;
 };
 
-struct ParseContext
-{
-	QString context;
-	int pos;
-};
-
-struct PoseAction
-{
-
-
-};
-
-
 class MeteorPoseDefine
 {
 public:
+	enum SourceType
+	{
+		FROM_CHARACTER = 0,
+		FROM_NPC,
+	};
+
 	struct PoseAction
 	{
 		int Start;
@@ -83,8 +82,11 @@ public:
 
 	struct PoseAttack
 	{
+		PoseAttack();
 		QString ToCSV(const QString& key) const;
+		static QString GetCSVHeader();
 
+	public:
 		QString Bone;
 		int Start;
 		int End;
@@ -134,6 +136,8 @@ public:
 	void ToFriendlyString(QString& startEnd);
 
 	bool ToAttackCSVString(QString& csv);
+
+	bool ToMayaExportSection(SourceType type, int& index, QString& sec1, QString& sec2);
 
 public:
 	int PoseIndex;
