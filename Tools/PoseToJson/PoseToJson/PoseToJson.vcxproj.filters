@@ -27,9 +27,15 @@
     <ClCompile Include="MeteorPose.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MyTEST.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MeteorPose.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MyTEST.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

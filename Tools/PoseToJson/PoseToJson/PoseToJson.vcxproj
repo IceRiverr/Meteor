@@ -139,9 +139,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeteorPose.cpp" />
+    <ClCompile Include="MyTEST.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MeteorPose.h" />
+    <ClInclude Include="MyTEST.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
