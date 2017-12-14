@@ -38,13 +38,14 @@ struct KeyValuePair
 
 int parse_meteor_pose(const QString& posePath, const QString& jsonPath);
 
-int remove_start_frame(
+int generate_meteor_data_file(
 	const QString& jsonPath, 
 	const QString& correctPath, 
 	const QString& removeStartFramePath,
 	const QString& attackCSVPath,
 	const QString& npcExportSectionPath,
-	const QString& characterExportSectionPath);
+	const QString& characterExportSectionPath,
+	const QString& friendlyStartEndPath);
 
 class Node
 {

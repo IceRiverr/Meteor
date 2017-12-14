@@ -11,39 +11,53 @@
 int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
-
-	bool bParse = true;
-	bool bDecStartFrame = true;
-
-	QString filePath = "D:\\Projects\\Meteor\\Tools\\PoseToJson\\PoseToJson\\PoseFile\\P0\\";
-	QString posePath = filePath + "P0.POS";
-	QString jsonPath = filePath + "P0.POS.json";
-
-	QString correctJsonPath = filePath + "P0.POS.Correct.json";
-	QString baseFrameJsonPath = filePath + "P0.POS.FrameStart.json";
-	QString attackCSVPath = filePath + "P0.POS.Attack.csv";
-
-	QString npcExportSection = filePath + "P0.Pose.Export.txt";
-	QString characterExportSection = filePath + "P0.Character.Export.txt";
-
-	if (bParse)
-	{
-		parse_meteor_pose(posePath, jsonPath);
-		qDebug() << "Parse initial file succeed!" << endl;
-	}
 	
-	if (bDecStartFrame)
+	QString gamePModelPath = "D:\\Projects\\Meteor\\Game\\Meteor\\pmodel\\";
+	QString filePath = "D:\\Projects\\Meteor\\Tools\\PoseToJson\\PoseToJson\\PoseFile\\";
+	int NPCCount = 20;
+
+	bool bNeedCmdParam = true;
+	if (bNeedCmdParam)
 	{
-		remove_start_frame(
-			jsonPath, 
-			correctJsonPath, 
-			baseFrameJsonPath, 
+		if (argc == 4)
+		{
+			gamePModelPath = QString(argv[1]);
+			filePath = QString(argv[2]);
+			NPCCount = QString(argv[3]).toInt();
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	for (int i = 0; i < NPCCount; ++i)
+	{
+		int NPCIndex = i;
+
+		QString posePath = gamePModelPath + QString("P%1.POS").arg(NPCIndex);
+		QString jsonPath = filePath + QString("P%1.POS.json").arg(NPCIndex);
+		QString correctJsonPath = filePath + QString("P%1.POS.Correct.json").arg(NPCIndex);
+		QString baseFrameJsonPath = filePath + QString("P%1.POS.RemoveFrameOffset.json").arg(NPCIndex);
+		QString attackCSVPath = filePath + QString("P%1.POS.Attack.csv").arg(NPCIndex);
+		QString npcExportSection = filePath + QString("P%1.Pose.Export.txt").arg(NPCIndex);
+		QString characterExportSection = filePath + QString("P%1.Character.Export.txt").arg(NPCIndex);
+		QString friendlyStartEndPath = filePath + QString("P%1.FriendlyStartEnd.txt").arg(NPCIndex);
+
+		QString tmp = QString("P%1.POS").arg(NPCIndex);
+		
+		parse_meteor_pose(posePath, jsonPath);
+		qDebug() << "Parse" << tmp << "succeed!";
+
+		generate_meteor_data_file(
+			jsonPath,
+			correctJsonPath,
+			baseFrameJsonPath,
 			attackCSVPath,
 			npcExportSection,
-			characterExportSection);
+			characterExportSection,
+			friendlyStartEndPath);
+		qDebug() << "Generate" << tmp << "succeed!\n";
 	}
-
-	//getchar();
-
 	return a.exec();
 }

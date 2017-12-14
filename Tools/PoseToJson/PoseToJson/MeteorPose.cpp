@@ -195,7 +195,8 @@ bool check_is_key_value(const QString& src, QFile& file, KeyValuePair& keyValue)
 		QString currentLine = src;
 		QString boneStr;
 		
-		while (currentLine.lastIndexOf(",") == currentLine.length() - 1)
+		while (currentLine.lastIndexOf(",") == currentLine.length() - 1 && 
+			(currentLine.indexOf("bone") >= 0 || currentLine.indexOf("\'") >= 0))
 		{
 			boneStr.append(currentLine);
 			get_next_line(file, currentLine);
@@ -389,13 +390,14 @@ bool parse_jsonObj_to_float(QJsonObject& obj, const QString& key, float& val)
 	return false;
 }
 
-int remove_start_frame(
+int generate_meteor_data_file(
 	const QString& jsonPath,
 	const QString& correctPath,
 	const QString& removeStartFramePath,
 	const QString& attackCSVPath,
 	const QString& npcExportSectionPath,
-	const QString& characterExportSectionPath)
+	const QString& characterExportSectionPath,
+	const QString& friendlyStartEndPath)
 {
 	QFile poseFile(jsonPath);
 	if (!poseFile.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -435,7 +437,7 @@ int remove_start_frame(
 					}
 				}
 			}
-			qDebug() << "Pose Count:" << PoseDefines.length() << endl;
+			qDebug() << "Pose Count:" << PoseDefines.length();
 
 			// correctPath
 			{
@@ -488,7 +490,7 @@ int remove_start_frame(
 				qDebug() << "write remove start frame json succeed!";
 			}
 
-			// write attackPaht
+			// write attackPath
 			{
 				QString csvStr;
 				csvStr += MeteorPoseDefine::PoseAttack::GetCSVHeader();
@@ -498,6 +500,19 @@ int remove_start_frame(
 				}
 				write_text_to_file(csvStr, attackCSVPath);
 				qDebug() << "write attack csv succeed!";
+			}
+
+			// write friendly start&end
+			{
+				QString startEnd;
+				startEnd += "Name\tStart\tEnd\tMisc\t\n";
+
+				for (int i = 0; i < PoseDefines.length(); ++i)
+				{
+					PoseDefines[i].ToFriendlyString(startEnd);
+				}
+				write_text_to_file(startEnd, friendlyStartEndPath);
+				qDebug() << "write friendly start&end succeed!";
 			}
 		}
 	}
@@ -757,7 +772,17 @@ void MeteorPoseDefine::FromJson(QJsonObject& poseObj)
 
 					parse_jsonObj_to_int(actionObj, "Start", poseAction.Start);
 					parse_jsonObj_to_int(actionObj, "End", poseAction.End);
-					parse_jsonObj_to_float(actionObj, "Speed", poseAction.Speed);
+					
+					// 某些Action中缺少Speed项
+					float speed = 1.0f;
+					if (parse_jsonObj_to_float(actionObj, "Speed", speed))
+					{
+						poseAction.Speed = speed;
+					}
+					else
+					{
+						poseAction.Speed = 1.0f;
+					}
 
 					this->PoseActions.append(poseAction);
 
@@ -865,16 +890,32 @@ void MeteorPoseDefine::FromJson(QJsonObject& poseObj)
 
 void MeteorPoseDefine::ToFriendlyString(QString& startEnd)
 {
-	QString header = QString("Header\tStart\tEnd\tLStart\tLEnd\n");
-	QString pose = QString("%1\t%2\t%3\t%4\t%5\n").arg(this->PoseIndex).arg(this->Start).arg(this->End).arg(this->LoopStart).arg(this->LoopEnd);
-	QString actions = "";
-	for (int i = 0; i < PoseActions.length(); ++i)
+	if (this->Source != -1 && this->PoseIndex != -1)
 	{
-		QString action = QString("Action\t%1\t%2\n").arg(PoseActions[i].Start).arg(PoseActions[i].End);
-		actions.append(action);
-	}
+		startEnd += QString("P-%1:\t%2\t%3\t\n").arg(this->PoseIndex).arg(this->Start).arg(this->End);
 
-	QString attacks = "";
+		for (int i = 0; i < PoseActions.length(); ++i)
+		{
+			const PoseAction& action = PoseActions[i];
+			startEnd += QString("%1\t%2\t%3\t%4\t\n").arg("Action:").arg(action.Start).arg(action.End).arg(QString::number(action.Speed, 'f', 2));
+		}
+		for (int i = 0; i < PoseAttacks.length(); ++i)
+		{
+			const PoseAttack& attack = PoseAttacks[i];
+			startEnd += QString("%1\t%2\t%3\t%4\t\n").arg("Attack:").arg(attack.Start).arg(attack.End).arg(QString::number(attack.DefenseValue, 'f', 2));
+		}
+		for (int i = 0; i < PoseDrags.length(); ++i)
+		{
+			const PoseDrag& drag = PoseDrags[i];
+			startEnd += QString("%1\t%2\t%3\t%4\t\n").arg("Drag:").arg(drag.Start).arg(drag.End).arg(QString::number(drag.Time, 'f', 2));
+		}
+
+		if (this->ToNextPose.Start != -1 && this->ToNextPose.End != -1)
+		{
+			startEnd += QString("%1\t%2\t%3\t%4\t\n").arg("NPose:").arg(ToNextPose.Start).arg(ToNextPose.End).arg(QString::number(ToNextPose.Time, 'f', 2));
+		}
+		startEnd += "\n";
+	}
 }
 
 bool MeteorPoseDefine::ToAttackCSVString(QString& csv)
