@@ -11,62 +11,61 @@ UCLASS()
 class METEOR_API AAttackCharacter : public ACharacter
 {
 	GENERATED_BODY()
-
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	class USkeletalMeshComponent* CharacterMesh;
-
-public:
-	// Sets default values for this character's properties
-	AAttackCharacter();
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
+	enum ATTACK_STATE
+	{
+		ATK_IDLE,
+		ATK_PLAYING,
+		ATK_NEXTPOSE,
+	};
+
+	// Sets default values for this character's properties
+	AAttackCharacter();
+
 	// Called every frame
+	void Tick2(float DeltaTime);
+
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-public:
-	
 	void OnAttack();
+
 	void StopAttack();
 
-	UFUNCTION(BlueprintCallable, Category = "Test|Chui")
-	void ResetMontageState();
+	void OnAttackV2();
 
-	UFUNCTION(BlueprintCallable, Category = "Test|Chui")
-	void SetBlendOut_MontageName(FString name);
+	UAnimMontage* GetPoseMontage(int32 pose);
 
-	void MyMontageBlendOut(UAnimMontage* Montage, bool bInterrupted);
+	float GetSectionPlayRate(UAnimMontage* montage, FName sectionName);
+
+	bool CanAttack();
+
+	void GetAnimMetaData(UAnimMontage* montage);
+
+	bool ConsumeInputKey();
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimMontage* AM_Pose315;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimMontage* AM_Pose317;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimMontage* AM_Pose321;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	bool bAttack;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	bool bPose315BlendOut;
+	TAssetPtr<UDataTable> PoseInfoTable;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	bool bPose317BlendOut;
+	int32 CurrentPoseIndex;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	bool bPose321BlendOut;
+	bool bAcceptInput;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	TAssetPtr<UDataTable> dataTable;
+	float NextPoseTime;
+
 private:
 	FString currentToEndMontageName;
 
@@ -78,4 +77,19 @@ private:
 	float Pose315_NextPose_Time;
 
 	FStreamableManager StreamMgr;
+
+	TMap<FName, float> SectionRatioCache;
+	TMap<FName, bool> SectionRatioHasSet;
+	FName NextPoseOut;
+	FName NextPoseIn;
+
+	// ½øÐÐ¼ò»¯
+	TMap<int32, int32> TmpPoseTranslationTable;
+	bool IsInTranslation;
+
+	FTimerHandle NextPoseTransitionTimer;
+
+	bool bAttackKeyDown;
+
+	ATTACK_STATE AttackState;
 };
