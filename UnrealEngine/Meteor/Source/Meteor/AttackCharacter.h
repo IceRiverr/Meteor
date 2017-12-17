@@ -22,21 +22,67 @@ public:
 		ATK_NEXTPOSE,
 	};
 
+	// Left Right Up Down Attack
+	enum ATTACK_KEY
+	{
+		KEY_L = 0,
+		KEY_R,
+		KEY_U,
+		KEY_D,
+		KEY_A,
+		KEY_NUM,
+	};
+
+	struct FrameInputKey
+	{
+		FrameInputKey();
+		FrameInputKey(ATTACK_KEY key, float time);
+		void SetKeyDown(ATTACK_KEY key);
+		bool GetValidChars(TArray<TCHAR>& chars) const;
+		bool GetValidStr(FString& str) const;
+		void Reset();
+
+		float timeStamp;
+
+		bool L_Down;
+		bool R_Down;
+		bool U_Down;
+		bool D_Down;
+		bool A_Down;
+	};
+
 	AAttackCharacter();
 
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void OnAttackV2();
+	void OnAttack();
 
 	void StopAttack();
+
+	void OnLeftKeyDown();
+
+	void OnRightKeyDown();
+
+	void OnUpKeyDown();
+
+	void OnDownKeyDown();
 
 	UAnimMontage* GetPoseMontage(int32 pose);
 
 	void GetAnimMetaData(UAnimMontage* montage);
 
 	bool ConsumeInputKey();
+
+	TArray<FString> GetPosiableCombinationKey();
+
+	// 因为每一帧可能同时按下几个键，并且由于可能的组合键有1-4个，所有全部需要生成
+	TArray<FString> GetAllCominationKey();
+
+	void PushAttackKey(ATTACK_KEY key, float time);
+
+	int32 GetNextPose(int32 poseIdx, const TArray<FName>& inputCmds);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -63,6 +109,8 @@ private:
 	FAlphaBlend tmpBlend;
 
 	TMap<int32, int32> TmpPoseTranslationTable;
+
+	TMap<int32, TArray<int32>> PoseToNextTable;
 	
 	FTimerHandle NextPoseTransitionTimer;
 
@@ -72,4 +120,7 @@ private:
 
 	float NextPoseTimer;
 	UAnimMontage* NextPoseMtg;
+
+	int32 MAX_INPUT_BUFFER;
+	TArray<FrameInputKey> InputBuffer;
 };

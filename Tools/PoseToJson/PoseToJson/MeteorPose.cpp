@@ -209,13 +209,30 @@ bool check_is_key_value(const QString& src, QFile& file, KeyValuePair& keyValue)
 		{
 			QString bone = first_letter_upper(bonePair[0].simplified());
 			QString boneNames = bonePair[1];
-			boneNames.replace(QRegExp("\""), "");
-			boneNames = boneNames.simplified();
+			
+			// 这么处理的原因是有部分空格没有完全转化为 "_"
+			QString newBoneNames;
+			QStringList bones = boneNames.split(",");
+			for (int i = 0; i < bones.length(); ++i)
+			{
+				QString tmpBone = bones.at(i);
+				if (tmpBone.isEmpty() == false)
+				{
+					tmpBone = tmpBone.simplified();
+					tmpBone.replace(" ", "_");
+					newBoneNames.append(tmpBone);
+					newBoneNames.append(",");
+				}
+			}
+			if (newBoneNames.length() > 0)
+			{
+				if (newBoneNames.at(newBoneNames.length() - 1) == ",")
+				{
+					newBoneNames = newBoneNames.mid(0, newBoneNames.length() - 1);
+				}
+			}
 
-			boneNames.replace(" ", "_");
-			boneNames.replace(",", "|");
-
-			keyValue = KeyValuePair(VALUE_BONE, bone, boneNames);
+			keyValue = KeyValuePair(VALUE_BONE, bone, newBoneNames);
 			return true;
 		}
 	}
@@ -990,14 +1007,27 @@ MeteorPoseDefine::PoseAttack::PoseAttack()
 
 QString MeteorPoseDefine::PoseAttack::ToCSV(const QString& key) const
 {
-	QString boneString = this->Bone;
-	//boneString.replace(" ", "_");
-	//boneString.replace(",", "|");
-	
-	QString csvStr = QString("%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,%11,%12,%13,%14,%15\n")
+	QString boneString;
+	if (this->Bone.length() > 3)
+	{
+		QStringList attackBones = this->Bone.split(",");
+		QString attackStr;
+
+		// 为了符合csv中字符串数组的格式
+		if (attackBones.length() > 0)
+		{
+			for (int i = 0; i < attackBones.length() - 1; ++i)
+			{
+				QString tmpBone = attackBones[i];
+				attackStr.append("\"").append(tmpBone).append("\"").append(",");
+			}
+			attackStr.append("\"").append(attackBones.last()).append("\"");
+			boneString = "\"(" + attackStr + ")\"";
+		}
+	}
+
+	QString csvStr = QString("%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,%11,%12,%13\n")
 		.arg(key)
-		.arg(Start)
-		.arg(End)
 		.arg(AttackType)
 		.arg(CheckFriend)
 		.arg(QString::number(DefenseValue, 'f', 2))
@@ -1015,6 +1045,6 @@ QString MeteorPoseDefine::PoseAttack::ToCSV(const QString& key) const
 
 QString MeteorPoseDefine::PoseAttack::GetCSVHeader()
 {
-	QString header = QString(",Start,End,AttackType,CheckFriend,DefenseValue,DefenseMove,TargetValue,TargetMove,TargetPose,TargetPoseFront,TargetPoseBack,TargetPoseLeft,TargetPoseRight,Bone\n");
+	QString header = QString(",AttackType,CheckFriend,DefenseValue,DefenseMove,TargetValue,TargetMove,TargetPose,TargetPoseFront,TargetPoseBack,TargetPoseLeft,TargetPoseRight,Bone\n");
 	return header;
 }
