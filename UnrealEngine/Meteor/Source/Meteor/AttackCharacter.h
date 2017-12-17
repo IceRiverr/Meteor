@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "Engine/DataTable.h"
 #include "Engine/StreamableManager.h"
+#include "FPoseInputTable.h"
 
 #include "AttackCharacter.generated.h"
 
@@ -82,11 +83,14 @@ public:
 
 	void PushAttackKey(ATTACK_KEY key, float time);
 
-	int32 GetNextPose(int32 poseIdx, const TArray<FName>& inputCmds);
+	int32 GetNextPose(int32 poseIdx, const TArray<FString>& inputCmds, bool bInAir = false);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	TAssetPtr<UDataTable> PoseInfoTable;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	TAssetPtr<UDataTable> Dao_PoseChangeTable;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	int32 CurrentPoseIndex;
@@ -108,10 +112,6 @@ private:
 	
 	FAlphaBlend tmpBlend;
 
-	TMap<int32, int32> TmpPoseTranslationTable;
-
-	TMap<int32, TArray<int32>> PoseToNextTable;
-	
 	FTimerHandle NextPoseTransitionTimer;
 
 	bool bAttackKeyDown;
@@ -123,4 +123,8 @@ private:
 
 	int32 MAX_INPUT_BUFFER;
 	TArray<FrameInputKey> InputBuffer;
+
+	TArray<FPoseInputTable*> Dao_AllPoses;
+
+	int32 Dao_FirstAttackPose;
 };
