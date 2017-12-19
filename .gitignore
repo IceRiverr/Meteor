@@ -50,7 +50,6 @@ UnrealEngine/Meteor/Intermediate/
 UnrealEngine/Meteor/Content/StarterContent/
 UnrealEngine/Meteor/Content/ThirdPerson/
 UnrealEngine/Meteor/Content/Geometry/
-UnrealEngine/Meteor/Content/Test/
 UnrealEngine/Meteor/Content/Mannequin/
 UnrealEngine/Meteor/Config/
 
@@ -62,10 +61,5 @@ UnrealEngine/Meteor/Content/Meteor/Textures/
 UnrealEngine/Meteor/Content/Meteor/Weapons/
 UnrealEngine/Meteor/Content/Meteor/UI/Textures/
 
-UnrealEngine/TestGame/
-
-
-Tools/PoseToJson/PoseToJson/P0_Test.json
-Tools/PoseToJson/PoseToJson/Pose/P0.POS
 UnrealEngine/Meteor/build/
 Tools/PoseToJson/PoseToJson/PoseFile/
