@@ -66,6 +66,10 @@ public:
 
 	void LookUp(float Value);
 
+	void OnJump();
+
+	void StopJump();
+
 	void OnAttack();
 
 	void StopAttack();
@@ -94,6 +98,10 @@ public:
 	int32 GetNextPose(int32 poseIdx, const TArray<FString>& inputCmds, bool bInAir = false);
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void ConsumeJumpKey();
+
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	TAssetPtr<UDataTable> PoseInfoTable;
 	
@@ -109,6 +117,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float NextPoseTime;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float MoveFwdSpeedFactor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float MoveBwdSpeedFactor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float MoveRightSpeedFactor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	bool bIsAttacking;
+
 private:
 	FStreamableManager StreamMgr;
 
@@ -123,6 +143,8 @@ private:
 	FTimerHandle NextPoseTransitionTimer;
 
 	bool bAttackKeyDown;
+
+	bool bJumpKeyDown;
 
 	ATTACK_STATE AttackState;
 

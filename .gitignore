@@ -63,3 +63,5 @@ UnrealEngine/Meteor/Content/Meteor/UI/Textures/
 
 UnrealEngine/Meteor/build/
 Tools/PoseToJson/PoseToJson/PoseFile/
+Map_max/
+Ref/
