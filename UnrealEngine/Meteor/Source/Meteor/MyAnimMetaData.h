@@ -26,3 +26,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MetaData")
 	FName NextPoseOut;
 };
+
+UENUM()
+enum class EAnimFlag : uint8
+{
+	Unknow = 0,
+	Attack,
+	Jump,
+	Sprint,
+	Block,
+	BeHit,
+	Death,
+};
+
+UCLASS()
+class UAnimMetaData_Flag : public UAnimMetaData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MetaData")
+	EAnimFlag AnimFlag;
+};

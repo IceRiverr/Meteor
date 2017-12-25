@@ -373,5 +373,26 @@ for frame_index in range(655, 669 + 1):
 	print frame_index
 	
 
+#将rootmotion清除掉
+import pymel.core as pmc
+import pymel.core.datatypes as pmdt
 
+for frame_index in range(646, 826):
+	pmc.currentTime(int(frame_index))
+	pmc.select("d_base")
+	
+	pmc.xform(t = (0, 0, 0))
+	
+	pmc.setKeyframe()
+	
+	transZ = pmc.getAttr("d_base.translateZ")
+	
+	frame_Z = "%d,%f" % (frame_index, transZ) 
+	
+	print frame_Z
+	
+	
+	
+	
 
+	

@@ -5,6 +5,7 @@
 #include "Engine/DataTable.h"
 #include "Engine/StreamableManager.h"
 #include "FPoseInputTable.h"
+#include "MyAnimMetaData.h"
 
 #include "AttackCharacter.generated.h"
 
@@ -52,6 +53,21 @@ public:
 		bool A_Down;
 	};
 
+	enum class SPRINT_DIRECTION
+	{
+		SPRINT_IDLE = 0,
+		SPRINT_FWD,
+		SPRINT_BWD,
+		SPRINT_RIGHT,
+		SPRINT_LEFT,
+	};
+
+	struct CombatAction
+	{
+		FName InputCmd;
+		int32 PoseIndex;
+	};
+
 	AAttackCharacter();
 
 	virtual void Tick(float DeltaTime) override;
@@ -86,7 +102,7 @@ public:
 
 	void GetAnimMetaData(UAnimMontage* montage);
 
-	bool ConsumeInputKey();
+	EAnimFlag GetAnimFlag(UAnimMontage* montage);
 
 	TArray<FString> GetPosiableCombinationKey();
 
@@ -97,54 +113,68 @@ public:
 
 	int32 GetNextPose(int32 poseIdx, const TArray<FString>& inputCmds, bool bInAir = false);
 
+	SPRINT_DIRECTION GetReadySprintDirection(const TArray<FString>& InputCmds);
+
+	void UpdateInputBuffer(float bufferMaxTime);
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "Attack")
-	void ConsumeJumpKey();
+	bool ConsumeInputKey();
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	TAssetPtr<UDataTable> PoseInfoTable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
+	UDataTable* PoseInfoTable;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	TAssetPtr<UDataTable> Dao_PoseChangeTable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
+	UDataTable* Dao_PoseChangeTable;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
 	int32 CurrentPoseIndex;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	bool bAcceptInput;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
 	float NextPoseTime;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	bool bAcceptInput;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	bool bIsAttacking;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	float InputBufferMaxTime;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float MoveFwdSpeedFactor;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float MoveBwdSpeedFactor;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float MoveRightSpeedFactor;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	bool bIsAttacking;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sprint)
+	UAnimMontage* SprintForwadMtg;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sprint)
+	UAnimMontage* SprintBackwardMtg;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sprint)
+	UAnimMontage* SprintRightMtg;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sprint)
+	UAnimMontage* SprintLeftMtg;
 
 private:
 	FStreamableManager StreamMgr;
 
 	// attack montage
 	TMap<FName, float> SectionRatioCache;
-	TMap<FName, bool> SectionRatioHasSet;
 	FName NextPoseOut;
 	FName NextPoseIn;
 	
 	FAlphaBlend tmpBlend;
 
-	FTimerHandle NextPoseTransitionTimer;
-
 	bool bAttackKeyDown;
-
-	bool bJumpKeyDown;
 
 	ATTACK_STATE AttackState;
 
@@ -155,4 +185,8 @@ private:
 	TArray<FrameInputKey> InputBuffer;
 
 	TArray<FPoseInputTable*> Dao_AllPoses;
+
+	bool bIsSprinting; 
+
+	EAnimFlag CurrentAnimFlag;
 };
