@@ -1,3 +1,5 @@
+// Copyright IceRiver. All Rights Reserved.
+
 #pragma once
 
 #include "Animation/AnimMontage.h"
@@ -6,6 +8,7 @@
 #include "Engine/StreamableManager.h"
 #include "FPoseInputTable.h"
 #include "MyAnimMetaData.h"
+#include "Components/InputBufferComponent.h"
 
 #include "AttackCharacter.generated.h"
 
@@ -22,35 +25,6 @@ public:
 		ATK_IDLE,
 		ATK_PLAYING,
 		ATK_NEXTPOSE,
-	};
-
-	// Left Right Up Down Attack
-	enum ATTACK_KEY
-	{
-		KEY_L = 0,
-		KEY_R,
-		KEY_U,
-		KEY_D,
-		KEY_A,
-		KEY_NUM,
-	};
-
-	struct FrameInputKey
-	{
-		FrameInputKey();
-		FrameInputKey(ATTACK_KEY key, float time);
-		void SetKeyDown(ATTACK_KEY key);
-		bool GetValidChars(TArray<TCHAR>& chars) const;
-		bool GetValidStr(FString& str) const;
-		void Reset();
-
-		float timeStamp;
-
-		bool L_Down;
-		bool R_Down;
-		bool U_Down;
-		bool D_Down;
-		bool A_Down;
 	};
 
 	enum class SPRINT_DIRECTION
@@ -90,43 +64,25 @@ public:
 
 	void StopAttack();
 
-	void OnLeftKeyDown();
-
-	void OnRightKeyDown();
-
-	void OnUpKeyDown();
-
-	void OnDownKeyDown();
-
 	UAnimMontage* GetPoseMontage(int32 pose);
 
 	void GetAnimMetaData(UAnimMontage* montage);
 
 	EAnimFlag GetAnimFlag(UAnimMontage* montage);
 
-	TArray<FString> GetPosiableCombinationKey();
-
-	// 因为每一帧可能同时按下几个键，并且由于可能的组合键有1-4个，所有全部需要生成
-	TArray<FString> GetAllCominationKey();
-
-	void PushAttackKey(ATTACK_KEY key, float time);
-
 	int32 GetNextPose(int32 poseIdx, const TArray<FString>& inputCmds, bool bInAir = false);
 
 	SPRINT_DIRECTION GetReadySprintDirection(const TArray<FString>& InputCmds);
 
-	void UpdateInputBuffer(float bufferMaxTime);
-
 public:
-	UFUNCTION(BlueprintCallable, Category = "Attack")
-	bool ConsumeInputKey();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputBuffer)
+	UInputBufferComponent* InputBufferCP;
 
-public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
-	UDataTable* PoseInfoTable;
+	TAssetPtr<UDataTable> PoseInfoTable;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
-	UDataTable* Dao_PoseChangeTable;
+	TAssetPtr<UDataTable> Dao_PoseChangeTable;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
 	int32 CurrentPoseIndex;
@@ -134,15 +90,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
 	float NextPoseTime;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputBuffer)
 	bool bAcceptInput;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputBuffer)
 	bool bIsAttacking;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
-	float InputBufferMaxTime;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float MoveFwdSpeedFactor;
 
@@ -174,19 +127,16 @@ private:
 	
 	FAlphaBlend tmpBlend;
 
-	bool bAttackKeyDown;
-
 	ATTACK_STATE AttackState;
 
 	float NextPoseTimer;
 	UAnimMontage* NextPoseMtg;
-
-	int32 MAX_INPUT_BUFFER;
-	TArray<FrameInputKey> InputBuffer;
 
 	TArray<FPoseInputTable*> Dao_AllPoses;
 
 	bool bIsSprinting; 
 
 	EAnimFlag CurrentAnimFlag;
+
+	bool bUpKeyHold;
 };

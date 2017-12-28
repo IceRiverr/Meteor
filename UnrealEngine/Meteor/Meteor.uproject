@@ -13,6 +13,13 @@
 			]
 		}
 	],
+	"Plugins": [
+		{
+			"Name": "InputBuffer",
+			"Enabled": false,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/c563909f15434f63869af1cb8046a5ff"
+		}
+	],
 	"TargetPlatforms": [
 		"WindowsNoEditor"
 	]
