@@ -74,6 +74,8 @@ public:
 
 	SPRINT_DIRECTION GetReadySprintDirection(const TArray<FString>& InputCmds);
 
+	int32 GenerateAttackCommond(int32 OldAttackCmd);
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputBuffer)
 	UInputBufferComponent* InputBufferCP;
@@ -117,6 +119,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sprint)
 	UAnimMontage* SprintLeftMtg;
 
+	/** 快速前后左右移动时，给一个等待时间，如果攻击键还没有按下，则执行Sprint */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sprint)
+	float MaxSprintWaitTime;
+
 private:
 	FStreamableManager StreamMgr;
 
@@ -138,5 +144,5 @@ private:
 
 	EAnimFlag CurrentAnimFlag;
 
-	bool bUpKeyHold;
+	float SprintHoldTimer;
 };
