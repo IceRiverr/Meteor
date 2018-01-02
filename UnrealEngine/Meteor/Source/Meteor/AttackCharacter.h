@@ -9,8 +9,11 @@
 #include "FPoseInputTable.h"
 #include "MyAnimMetaData.h"
 #include "Components/InputBufferComponent.h"
+#include "Meteor/Common/MeteorDef.h"
 
 #include "AttackCharacter.generated.h"
+
+using namespace Meteor;
 
 UCLASS()
 class METEOR_API AAttackCharacter : public ACharacter
