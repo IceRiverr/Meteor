@@ -8,10 +8,11 @@
 
 #include "InputCommamdComponent.generated.h"
 
-// 计划按照 如下的思路实现一版
-// http://forums.shoryuken.com/discussion/181469/programing-fighting-game-inputs
-
 using namespace Meteor;
+/** 
+* 计划按照 如下的思路实现一版
+* http://forums.shoryuken.com/discussion/181469/programing-fighting-game-inputs
+*/
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class METEOR_API UInputCommamdComponent : public UActorComponent
@@ -41,15 +42,17 @@ public:
 	void RecreateStateRecord(int currStateId);
 
 private:
-	TArray<ActionStateDef> ActionList;
+	int KeyCount;
 
 	int KeyWaitTime; // 给一个15帧的时间
 
+	TArray<ActionStateDef> ActionList;
+
 	TMap<Meteor::INPUT_KEY, FKey> KeyMapping;
 
-	int KeyCount;
-
 	TArray<bool> CurrentFrameKeyState;
+
+	TArray<Meteor::INPUT_EVENT> CurrentFrameInputEvent;
 
 	TArray<ActionStateRecord> CurrentStateRecord;
 };

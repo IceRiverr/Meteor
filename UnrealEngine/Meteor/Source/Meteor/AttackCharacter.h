@@ -8,7 +8,8 @@
 #include "Engine/StreamableManager.h"
 #include "FPoseInputTable.h"
 #include "MyAnimMetaData.h"
-#include "Components/InputBufferComponent.h"
+#include "Meteor/Components/InputBufferComponent.h"
+#include "Meteor/Components/InputCommamdComponent.h"
 #include "Meteor/Common/MeteorDef.h"
 
 #include "AttackCharacter.generated.h"
@@ -148,4 +149,6 @@ private:
 	EAnimFlag CurrentAnimFlag;
 
 	float SprintHoldTimer;
+
+	UInputCommamdComponent* InputCommandCP;
 };

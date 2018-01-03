@@ -7,9 +7,10 @@ namespace Meteor
 {
 	enum class INPUT_EVENT
 	{
-		INPUT_Pressed = 0,
-		INPUT_Released,
-		INPUT_Hold,
+		INPUT_Pressed = 0,	// 按下 事件
+		INPUT_Released,		// 释放 事件
+		INPUT_Hold,			// 持续按下 事件
+		INPUT_Idle,			// 键盘处于 未激活状态
 	};
 
 	enum class INPUT_KEY
@@ -60,7 +61,7 @@ namespace Meteor
 	// 输入指令遵循MUGEN的指令，后期如果要扩展指令也好处理
 	struct InputCommand
 	{
-		bool CreateInputCommand(FName n, FString inputCmd); // 解析inputCmd来生成Command
+		bool CreateInputCommand(FName n, const FString& inputCmd); // 解析inputCmd来生成Command
 
 		FName Name;
 		TArray<InputState> Command;
@@ -77,12 +78,16 @@ namespace Meteor
 		int poseNo;
 		int juggling;
 		float attack;
+		int priority;
 	};
 
-	struct ActionStateRecord
+	class ActionStateRecord
 	{
+	public:
+		bool operator < (const ActionStateRecord& other) const;
+
 		ActionStateDef* Action;
 		int CmdState;
-		float Timer;
+		int Timer;
 	};
 }
