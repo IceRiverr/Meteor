@@ -41,7 +41,12 @@ public:
 
 	void RecreateStateRecord(int currStateId);
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
+	TAssetPtr<UDataTable> Dao_PoseChangeTable;
+
 private:
+
 	int KeyCount;
 
 	int KeyWaitTime; // 给一个15帧的时间
