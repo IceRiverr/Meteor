@@ -1,10 +1,10 @@
 
 #pragma once  
 #include "MeteorSingleton.h"  
-#include "MeteorSingletonLibrary.generated.h"  
+#include "MeteorFuncLib.generated.h"  
 
 UCLASS()
-class UMeteorSingletonLibrary : public UBlueprintFunctionLibrary
+class UMeteorFuncLib : public UBlueprintFunctionLibrary
 {
 	GENERATED_UCLASS_BODY()
 public:

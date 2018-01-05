@@ -7,33 +7,36 @@
 #include "FPoseInputTable.generated.h"
 
 USTRUCT(BlueprintType)
-struct  METEOR_API FPoseInputTable : public FTableRowBase
+struct  METEOR_API FPoseStateInfo : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pose InputKeys")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
 	int32 PoseID;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pose InputKeys")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
 	FString Group;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pose InputKeys")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
 	FString PoseName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pose InputKeys")
-	FString PoseInputKey;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
+	FString InputCommand;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pose InputKeys")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
 	bool bDefenceBreak;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pose InputKeys")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
 	int32 Anger;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pose InputKeys")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
 	bool bInAir;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pose InputKeys")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
+	int32 Priority;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
 	TAssetPtr<UAnimMontage> PoseMontage;
 };
 

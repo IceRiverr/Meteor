@@ -4,8 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "CombatSystemComponent.generated.h"
+#include "Animation/AnimMontage.h"
 
+#include "CombatSystemComponent.generated.h"
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class METEOR_API UCombatSystemComponent : public UActorComponent
@@ -21,6 +22,16 @@ protected:
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
-	
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sprint)
+	UAnimMontage* SprintForwadMtg;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sprint)
+	UAnimMontage* SprintBackwardMtg;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sprint)
+	UAnimMontage* SprintRightMtg;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sprint)
+	UAnimMontage* SprintLeftMtg;
 };

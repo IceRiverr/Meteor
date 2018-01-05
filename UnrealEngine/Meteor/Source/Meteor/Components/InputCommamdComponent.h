@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Engine/DataTable.h"
 #include "Meteor/Common/MeteorDef.h"
+#include "FPoseInputTable.h"
 
 #include "InputCommamdComponent.generated.h"
 
@@ -41,15 +43,30 @@ public:
 
 	void RecreateStateRecord(int currStateId);
 
+	FPoseStateInfo* GetPoseStateInfo(int stateNo);
+
+	bool CanAttack(ActionStateDef* Action);
+
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
-	TAssetPtr<UDataTable> Dao_PoseChangeTable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputCommand)
+	TAssetPtr<UDataTable> Dao_PoseStateInfo;
+
+	// 按键犹豫期
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = InputCommand)
+	int InputHaltTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MoveState)
+	int StateNo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MoveState)
+	bool bHasControl;
+
+	int LastStateNo;
+
+	STATE_TYPE CurrentStateType;
 
 private:
-
 	int KeyCount;
-
-	int KeyWaitTime; // 给一个15帧的时间
 
 	TArray<ActionStateDef> ActionList;
 
@@ -60,4 +77,6 @@ private:
 	TArray<Meteor::INPUT_EVENT> CurrentFrameInputEvent;
 
 	TArray<ActionStateRecord> CurrentStateRecord;
+
+
 };

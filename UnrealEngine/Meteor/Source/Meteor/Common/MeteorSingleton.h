@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "Engine/StreamableManager.h"
 #include "MeteorSingleton.generated.h"
 
 /**
@@ -19,4 +20,6 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Meteor Global")
 	int32 FrameCount;
+
+	FStreamableManager StreamMgr;
 };

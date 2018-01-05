@@ -1,13 +1,15 @@
-#include "MeteorSingletonLibrary.h"
+#include "MeteorFuncLib.h"
+
 #include "Engine/Engine.h"
 
-UMeteorSingletonLibrary::UMeteorSingletonLibrary(const FObjectInitializer& ObjectInitializer)
+
+UMeteorFuncLib::UMeteorFuncLib(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 
 }
 
-UMeteorSingleton* UMeteorSingletonLibrary::GetMeteorSingleton()
+UMeteorSingleton* UMeteorFuncLib::GetMeteorSingleton()
 {
 	UMeteorSingleton* MeteorSingleton = Cast<UMeteorSingleton>(GEngine->GameSingleton);
 	if (MeteorSingleton && MeteorSingleton->IsValidLowLevelFast(false))

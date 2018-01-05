@@ -84,6 +84,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputBuffer)
 	UInputBufferComponent* InputBufferCP;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputCP)
+	UInputCommamdComponent* InputCommandCP;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
 	TAssetPtr<UDataTable> PoseInfoTable;
 	
@@ -128,8 +131,6 @@ public:
 	float MaxSprintWaitTime;
 
 private:
-	FStreamableManager StreamMgr;
-
 	// attack montage
 	TMap<FName, float> SectionRatioCache;
 	FName NextPoseOut;
@@ -142,13 +143,11 @@ private:
 	float NextPoseTimer;
 	UAnimMontage* NextPoseMtg;
 
-	TArray<FPoseInputTable*> Dao_AllPoses;
+	TArray<FPoseStateInfo*> Dao_AllPoses;
 
 	bool bIsSprinting; 
 
 	EAnimFlag CurrentAnimFlag;
 
 	float SprintHoldTimer;
-
-	UInputCommamdComponent* InputCommandCP;
 };
