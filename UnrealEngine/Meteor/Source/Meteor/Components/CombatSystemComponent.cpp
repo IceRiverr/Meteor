@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Meteor/AttackCharacter.h"
 #include "Meteor/Components/InputCommandComponent.h"
+#include "Engine.h"
 
 UCombatSystemComponent::UCombatSystemComponent()
 {
