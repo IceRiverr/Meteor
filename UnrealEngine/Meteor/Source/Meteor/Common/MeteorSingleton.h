@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Engine/StreamableManager.h"
+
 #include "MeteorSingleton.generated.h"
 
 /**

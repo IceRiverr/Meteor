@@ -8,13 +8,14 @@
 #include "Engine/StreamableManager.h"
 #include "FPoseInputTable.h"
 #include "MyAnimMetaData.h"
-#include "Meteor/Components/InputBufferComponent.h"
-#include "Meteor/Components/InputCommamdComponent.h"
 #include "Meteor/Common/MeteorDef.h"
 
 #include "AttackCharacter.generated.h"
 
 using namespace Meteor;
+class UInputBufferComponent;
+class UInputCommandComponent;
+class UCombatSystemComponent;
 
 UCLASS()
 class METEOR_API AAttackCharacter : public ACharacter
@@ -64,46 +65,12 @@ public:
 
 	void StopJump();
 
-	void OnAttack();
-
-	void StopAttack();
-
-	UAnimMontage* GetPoseMontage(int32 pose);
-
-	void GetAnimMetaData(UAnimMontage* montage);
-
-	EAnimFlag GetAnimFlag(UAnimMontage* montage);
-
-	int32 GetNextPose(int32 poseIdx, const TArray<FString>& inputCmds, bool bInAir = false);
-
-	SPRINT_DIRECTION GetReadySprintDirection(const TArray<FString>& InputCmds);
-
-	int32 GenerateAttackCommond(int32 OldAttackCmd);
-
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputBuffer)
-	UInputBufferComponent* InputBufferCP;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UInputCommandComponent* InputCommandCP;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputCP)
-	UInputCommamdComponent* InputCommandCP;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
-	TAssetPtr<UDataTable> PoseInfoTable;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
-	TAssetPtr<UDataTable> Dao_PoseChangeTable;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
-	int32 CurrentPoseIndex;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pose)
-	float NextPoseTime;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputBuffer)
-	bool bAcceptInput;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputBuffer)
-	bool bIsAttacking;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCombatSystemComponent* CombatSystemCP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float MoveFwdSpeedFactor;
@@ -113,41 +80,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float MoveRightSpeedFactor;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sprint)
-	UAnimMontage* SprintForwadMtg;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sprint)
-	UAnimMontage* SprintBackwardMtg;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sprint)
-	UAnimMontage* SprintRightMtg;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sprint)
-	UAnimMontage* SprintLeftMtg;
-
-	/** 快速前后左右移动时，给一个等待时间，如果攻击键还没有按下，则执行Sprint */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Sprint)
-	float MaxSprintWaitTime;
-
 private:
-	// attack montage
-	TMap<FName, float> SectionRatioCache;
-	FName NextPoseOut;
-	FName NextPoseIn;
 	
-	FAlphaBlend tmpBlend;
-
-	ATTACK_STATE AttackState;
-
-	float NextPoseTimer;
-	UAnimMontage* NextPoseMtg;
-
-	TArray<FPoseStateInfo*> Dao_AllPoses;
-
-	bool bIsSprinting; 
-
-	EAnimFlag CurrentAnimFlag;
-
-	float SprintHoldTimer;
 };

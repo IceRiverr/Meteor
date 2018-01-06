@@ -1,7 +1,9 @@
 
 #pragma once  
 #include "MeteorSingleton.h"  
-#include "MeteorFuncLib.generated.h"  
+#include "Kismet/BlueprintFunctionLibrary.h"
+
+#include "MeteorFuncLib.generated.h"
 
 UCLASS()
 class UMeteorFuncLib : public UBlueprintFunctionLibrary
