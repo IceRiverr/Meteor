@@ -40,6 +40,8 @@ public:
 
 	void TickInputState();
 
+	void PoseprocessInputBuffer();
+
 	void TickStateRecord();
 
 	void RecreateStateRecord(int currStateId);
