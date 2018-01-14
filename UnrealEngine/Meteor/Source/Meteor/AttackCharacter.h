@@ -6,8 +6,8 @@
 #include "GameFramework/Character.h"
 #include "Engine/DataTable.h"
 #include "Engine/StreamableManager.h"
-#include "FPoseInputTable.h"
-#include "MyAnimMetaData.h"
+#include "MeteorDataTable.h"
+#include "MeteorAnimMetaData.h"
 #include "Meteor/Common/MeteorDef.h"
 
 #include "AttackCharacter.generated.h"
