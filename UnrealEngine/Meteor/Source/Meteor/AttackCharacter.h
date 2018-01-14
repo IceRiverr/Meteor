@@ -65,6 +65,15 @@ public:
 
 	void StopJump();
 
+	void Test_createSection(UAnimMontage* montage);
+
+	UFUNCTION(BlueprintCallable, Category = "Test")
+	void Play_TestMontage();
+
+	UInputCommandComponent* GetInputCommandComponent() { return InputCommandCP; }
+
+	UCombatSystemComponent* GetCombatSystemComponent() { return CombatSystemCP; }
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UInputCommandComponent* InputCommandCP;
@@ -80,6 +89,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float MoveRightSpeedFactor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat)
+	UAnimMontage* TestMtg;
+
 private:
 	
 };
