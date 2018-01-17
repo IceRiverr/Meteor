@@ -45,7 +45,8 @@ int generate_meteor_data_file(
 	const QString& attackCSVPath,
 	const QString& npcExportSectionPath,
 	const QString& characterExportSectionPath,
-	const QString& friendlyStartEndPath);
+	const QString& friendlyStartEndPath,
+	const QString& poseToCSV);
 
 class Node
 {

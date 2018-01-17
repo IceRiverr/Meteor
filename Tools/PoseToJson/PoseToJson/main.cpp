@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
 		QString npcExportSection = filePath + QString("P%1.Pose.Export.txt").arg(NPCIndex);
 		QString characterExportSection = filePath + QString("P%1.Character.Export.txt").arg(NPCIndex);
 		QString friendlyStartEndPath = filePath + QString("P%1.FriendlyStartEnd.txt").arg(NPCIndex);
+		QString poseToCSV = filePath + QString("P%1.PoseToCSV.txt").arg(NPCIndex);
 
 		QString tmp = QString("P%1.POS").arg(NPCIndex);
 		
@@ -56,7 +57,8 @@ int main(int argc, char *argv[])
 			attackCSVPath,
 			npcExportSection,
 			characterExportSection,
-			friendlyStartEndPath);
+			friendlyStartEndPath,
+			poseToCSV);
 		qDebug() << "Generate" << tmp << "succeed!\n";
 	}
 	return a.exec();

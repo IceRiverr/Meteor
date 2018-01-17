@@ -35,8 +35,31 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
 	int32 Priority;
-};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
+	int32 Start;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
+	int32 End;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
+	int32 LoopStart;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
+	int32 LoopEnd;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
+	int32 Link;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
+	int32 NextPose_Start;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
+	int32 NextPose_End;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateDef")
+	float NextPose_Time;
+};
 
 USTRUCT(BlueprintType)
 struct  METEOR_API FPoseChangeTable : public FTableRowBase

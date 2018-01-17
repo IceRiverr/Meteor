@@ -414,7 +414,8 @@ int generate_meteor_data_file(
 	const QString& attackCSVPath,
 	const QString& npcExportSectionPath,
 	const QString& characterExportSectionPath,
-	const QString& friendlyStartEndPath)
+	const QString& friendlyStartEndPath,
+	const QString& poseToCSVPath)
 {
 	QFile poseFile(jsonPath);
 	if (!poseFile.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -530,6 +531,27 @@ int generate_meteor_data_file(
 				}
 				write_text_to_file(startEnd, friendlyStartEndPath);
 				qDebug() << "write friendly start&end succeed!";
+			}
+
+			// write pose to csv
+			{
+				QString poseCSV;
+				//			1  2		3	  4   5          6       7       8         9                 10              11             
+				poseCSV += ",PoseIndex,Start,End,LoopStart,LoopEnd,Link,EffectType,NextPose.Start,NextPose.End,NextPose.Time\n";
+
+				for (int i = 0; i < PoseDefines.length(); ++i)
+				{
+					const MeteorPoseDefine& Define = PoseDefines[i];
+					QString pose = QString("%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,%11\n").
+						arg(Define.PoseIndex).arg(Define.PoseIndex).
+						arg(Define.Start).arg(Define.End).
+						arg(Define.LoopStart).arg(Define.LoopEnd).
+						arg(Define.Link).arg(Define.EffectType).
+						arg(Define.ToNextPose.Start).arg(Define.ToNextPose.End).arg(Define.ToNextPose.Time);
+					poseCSV += pose;
+				}
+				write_text_to_file(poseCSV, poseToCSVPath);
+				qDebug() << "write poseCSV succeed!";
 			}
 		}
 	}
