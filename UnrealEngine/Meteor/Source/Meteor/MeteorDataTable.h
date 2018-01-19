@@ -74,7 +74,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct  METEOR_API FPoseAttackTable : public FTableRowBase
+struct  METEOR_API FPoseAttackInfo : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 public:

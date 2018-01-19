@@ -5,4 +5,8 @@
 
 #include "EngineMinimal.h"
 
+#define HitBoxObjectChannel ECollisionChannel::ECC_GameTraceChannel1
+
+
+
 #endif

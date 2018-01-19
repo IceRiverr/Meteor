@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Engine/DataTable.h"
 #include "Engine/StreamableManager.h"
+
 #include "MeteorDataTable.h"
 #include "MeteorAnimMetaData.h"
 #include "Meteor/Common/MeteorDef.h"
@@ -16,6 +17,7 @@ using namespace Meteor;
 class UInputBufferComponent;
 class UInputCommandComponent;
 class UCombatSystemComponent;
+class UBoxComponent;
 
 UCLASS()
 class METEOR_API AAttackCharacter : public ACharacter
@@ -74,12 +76,69 @@ public:
 
 	UCombatSystemComponent* GetCombatSystemComponent() { return CombatSystemCP; }
 
+	UFUNCTION(BlueprintNativeEvent, Category = Collision)
+	void OnOverlapBegin(UPrimitiveComponent* Comp, AActor* otherActor, UPrimitiveComponent* otherComp,
+		int otherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	virtual void PostInitializeComponents() override;
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UInputCommandComponent* InputCommandCP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCombatSystemComponent* CombatSystemCP;
+
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bau_Head_Test;*/
+
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bau_Head;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bau_Spine;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bad_L_Thigh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bad_L_Calf;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bad_L_Foot;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bau_L_UpperArm;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bau_L_Forearm;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bau_L_Hand;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bau_Spine1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bau_Neck;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bad_R_Thigh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bad_R_Calf;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bad_R_Foot;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bau_R_UpperArm;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bau_R_Forearm;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* bau_R_Hand;*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float MoveFwdSpeedFactor;
@@ -93,6 +152,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat)
 	UAnimMontage* TestMtg;
 
+	TArray<UBoxComponent*> HitBoxCPs;
+	TArray<FString> HitBoxNames;
 private:
-	
 };
