@@ -68,7 +68,7 @@ public:
 
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	// ÏÂÃæµÄĞÅÏ¢×îºÃÊµÏÖÎª½è¿Ú£¬²¢ÇÒµ¥¶ÀĞ´Ò»¸öÄ£¿é
+	// ä¸‹é¢çš„ä¿¡æ¯æœ€å¥½å®ç°ä¸ºå€Ÿå£ï¼Œå¹¶ä¸”å•ç‹¬å†™ä¸€ä¸ªæ¨¡å—
 	UFUNCTION(BlueprintCallable, Category = "Meteor")
 	float GetHP();
 

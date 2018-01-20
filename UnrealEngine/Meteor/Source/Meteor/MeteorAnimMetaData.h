@@ -19,15 +19,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MetaData")
 	TMap<FName, float> SectionSpeeds;
 	
-	// ÓĞÕĞÊ½Á¬ÈëÊ±£¬½øÈëµÄSection
+	// æœ‰æ‹›å¼è¿å…¥æ—¶ï¼Œè¿›å…¥çš„Section
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MetaData")
 	FName NextPoseIn;
 
-	// ÓĞÁ¬ÕĞÁ¬³öÊ±£¬ÏÂÒ»ÕĞµÄ³ö¿Ú
+	// æœ‰è¿æ‹›è¿å‡ºæ—¶ï¼Œä¸‹ä¸€æ‹›çš„å‡ºå£
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MetaData")
 	FName NextPoseOut;
 
-	// Á¬µ½ÏÂÒ»ÕĞËùÊ¹ÓÃµÄÊ±¼ä
+	// è¿åˆ°ä¸‹ä¸€æ‹›æ‰€ä½¿ç”¨çš„æ—¶é—´
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MetaData")
 	float NextPoseTime;
 };
