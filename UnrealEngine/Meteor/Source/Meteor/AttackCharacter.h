@@ -82,63 +82,18 @@ public:
 
 	virtual void PostInitializeComponents() override;
 
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void ActiveAttackBoxs(int PoseAttackIndex);
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void CancleAttackBoxs();
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UInputCommandComponent* InputCommandCP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCombatSystemComponent* CombatSystemCP;
-
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bau_Head_Test;*/
-
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bau_Head;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bau_Spine;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bad_L_Thigh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bad_L_Calf;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bad_L_Foot;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bau_L_UpperArm;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bau_L_Forearm;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bau_L_Hand;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bau_Spine1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bau_Neck;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bad_R_Thigh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bad_R_Calf;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bad_R_Foot;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bau_R_UpperArm;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bau_R_Forearm;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UBoxComponent* bau_R_Hand;*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float MoveFwdSpeedFactor;
@@ -154,5 +109,6 @@ public:
 
 	TArray<UBoxComponent*> HitBoxCPs;
 	TArray<FString> HitBoxNames;
+	TArray<bool> HitBoxActives;
 private:
 };
