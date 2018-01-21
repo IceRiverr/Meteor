@@ -47,6 +47,8 @@ void AAttackCharacter::BeginPlay()
 void AAttackCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	WeaponTraceV1();
 }
 
 void AAttackCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -180,6 +182,13 @@ void AAttackCharacter::PostInitializeComponents()
 	{
 		HitBoxCPs[i]->OnComponentBeginOverlap.AddDynamic(this, &AAttackCharacter::OnOverlapBegin);
 	}
+
+	int WeaponHitBoxIndex = -1;
+	if (HitBoxNames.Find("weapon", WeaponHitBoxIndex))
+	{
+		WeaponHitBox = HitBoxCPs[WeaponHitBoxIndex];
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, FString::Printf(TEXT("--WEAPON--")));
+	}
 }
 
 void AAttackCharacter::ActiveAttackBoxs(int PoseAttackIndex)
@@ -219,4 +228,39 @@ void AAttackCharacter::CancleAttackBoxs()
 	{
 		HitBoxActives[i] = false;
 	}
+}
+
+void AAttackCharacter::WeaponTraceV1()
+{
+	if (WeaponHitBox)
+	{
+		FVector Start = WeaponHitBox->GetComponentLocation();
+		FVector Vel = Start - WeaponLastLocation;
+		FVector End = Start + Vel * 1.0f; // For Test
+		WeaponLastLocation = Start;
+
+		FVector HalfSize = WeaponHitBox->GetScaledBoxExtent();
+		FRotator Rotator = WeaponHitBox->GetComponentRotation();
+		TArray<FHitResult> HitResults;
+		TArray<AActor*> ActorsToIgonre;
+		ActorsToIgonre.Add(this);
+
+		if (UKismetSystemLibrary::BoxTraceMultiByProfile(
+			this, Start, End, HalfSize, Rotator, "HitBoxCheck", false, ActorsToIgonre, EDrawDebugTrace::ForOneFrame, HitResults, true, FLinearColor::Red, FLinearColor::Green, 0.05f))
+		{
+			for (int i = 0; i < HitResults.Num(); ++i)
+			{
+				FHitResult& Hit = HitResults[i];
+
+				//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("BoxTrace: %s"), *(HitResults[0].ToString())));
+				DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 10.0f, 4, FColor::Blue);
+			}
+		}
+	}
+}
+
+void AAttackCharacter::WeaponTraceV2()
+{
+	// 上面的方法要是不能精确获取，则通过12根射线去模拟；
+	// 然后获取击中位置的中心值；
 }

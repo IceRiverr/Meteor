@@ -88,6 +88,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void CancleAttackBoxs();
 
+	void WeaponTraceV1();
+
+	void WeaponTraceV2();
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UInputCommandComponent* InputCommandCP;
@@ -111,4 +115,6 @@ public:
 	TArray<FString> HitBoxNames;
 	TArray<bool> HitBoxActives;
 private:
+	UBoxComponent* WeaponHitBox;
+	FVector WeaponLastLocation;
 };
