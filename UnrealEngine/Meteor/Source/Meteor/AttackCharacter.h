@@ -19,6 +19,10 @@ class UInputCommandComponent;
 class UCombatSystemComponent;
 class UBoxComponent;
 
+// 此时应该产生一个攻击 TakeDamage();
+// 对手接受攻击，然后设置自己的参数，再受到攻击时，直接忽略掉；MUGE使用的JudgePoint，减少死连的情况；
+// 应该有操作，来设置，是否可以群攻，正常应该可以群攻，比如刀的招式
+
 UCLASS()
 class METEOR_API AAttackCharacter : public ACharacter
 {
@@ -27,29 +31,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	enum ATTACK_STATE
-	{
-		ATK_IDLE,
-		ATK_PLAYING,
-		ATK_NEXTPOSE,
-	};
-
-	enum class SPRINT_DIRECTION
-	{
-		SPRINT_IDLE = 0,
-		SPRINT_FWD,
-		SPRINT_BWD,
-		SPRINT_RIGHT,
-		SPRINT_LEFT,
-	};
-
-	struct CombatAction
-	{
-		FName InputCmd;
-		int32 PoseIndex;
-	};
-
 	AAttackCharacter();
+
+	virtual void PostInitializeComponents() override;
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -67,20 +51,9 @@ public:
 
 	void StopJump();
 
-	void Test_createSection(UAnimMontage* montage);
-
-	UFUNCTION(BlueprintCallable, Category = "Test")
-	void Play_TestMontage();
-
 	UInputCommandComponent* GetInputCommandComponent() { return InputCommandCP; }
 
 	UCombatSystemComponent* GetCombatSystemComponent() { return CombatSystemCP; }
-
-	UFUNCTION(BlueprintNativeEvent, Category = Collision)
-	void OnOverlapBegin(UPrimitiveComponent* Comp, AActor* otherActor, UPrimitiveComponent* otherComp,
-		int otherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	virtual void PostInitializeComponents() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void ActiveAttackBoxs(int PoseAttackIndex);
@@ -88,9 +61,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void CancleAttackBoxs();
 
-	void WeaponTraceV1();
-
-	void WeaponTraceV2();
+	void AttackBoxesTrace();
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -108,13 +79,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float MoveRightSpeedFactor;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat)
-	UAnimMontage* TestMtg;
-
 	TArray<UBoxComponent*> HitBoxCPs;
 	TArray<FString> HitBoxNames;
 	TArray<bool> HitBoxActives;
+	TArray<FVector> HitBoxLastLocations;
 private:
-	UBoxComponent* WeaponHitBox;
-	FVector WeaponLastLocation;
+	bool bAttackBoxActiveFlag;
+	bool bHasAttackOne;
 };

@@ -23,20 +23,15 @@ AAttackCharacter::AAttackCharacter()
 
 	MoveRightSpeedFactor = 0.3f;
 
+	bAttackBoxActiveFlag = false;
+	bHasAttackOne = false;
+
 	InputCommandCP = CreateDefaultSubobject<UInputCommandComponent>(TEXT("InputCommand"));
 	AddTickPrerequisiteComponent(InputCommandCP);
 
 	CombatSystemCP = CreateDefaultSubobject<UCombatSystemComponent>(TEXT("CombatSystem"));
 	AddTickPrerequisiteComponent(CombatSystemCP);
 	CombatSystemCP->SetInputCommandComponent(InputCommandCP);
-
-	/*bau_Head_Test = CreateDefaultSubobject<UBoxComponent>(TEXT("bau_Head_Test"));
-	bau_Head_Test->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "bau_Head");
-	bau_Head_Test->SetBoxExtent(FVector(12.0f, 10.0f, 10.0f));
-	bau_Head_Test->SetRelativeLocation(FVector(6.0f, 0.0f, 0.0f));
-	bau_Head_Test->bGenerateOverlapEvents = true;
-	bau_Head_Test->SetCollisionObjectType(HitBoxObjectChannel);
-	bau_Head_Test->SetCollisionProfileName("HitBoxCheck");*/
 }
 
 void AAttackCharacter::BeginPlay()
@@ -44,11 +39,39 @@ void AAttackCharacter::BeginPlay()
 	Super::BeginPlay();
 }
 
+void AAttackCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	TArray<UActorComponent*> Comps = GetComponentsByClass(UBoxComponent::StaticClass());
+	for (int i = 0; i < Comps.Num(); ++i)
+	{
+		UBoxComponent* HitBox = Cast<UBoxComponent>(Comps[i]);
+		if (HitBox && HitBox->GetCollisionObjectType() == HitBoxObjectChannel)
+		{
+			HitBoxCPs.Add(HitBox);
+			HitBoxNames.Add(HitBox->GetName());
+		}
+	}
+	HitBoxActives.SetNum(HitBoxCPs.Num());
+	HitBoxLastLocations.SetNum(HitBoxCPs.Num());
+
+	CancleAttackBoxs();
+}
+
 void AAttackCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	WeaponTraceV1();
+	if (bAttackBoxActiveFlag && !bHasAttackOne)
+	{
+		AttackBoxesTrace();
+	}
+
+	for (int i = 0; i < HitBoxCPs.Num(); ++i)
+	{
+		HitBoxLastLocations[i] = HitBoxCPs[i]->GetComponentLocation();
+	}
 }
 
 void AAttackCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -117,82 +140,10 @@ void AAttackCharacter::StopJump()
 	ACharacter::StopJumping();
 }
 
-void AAttackCharacter::Test_createSection(UAnimMontage* montage)
-{
-	if (montage)
-	{
-		/*int frames = montage->GetNumberOfFrames();
-		float step = frames / 30.0f;
-		montage->AddAnimCompositeSection("Act1", 0.0f);
-		montage->AddAnimCompositeSection("Act2", 0.1f * step);
-		montage->AddAnimCompositeSection("Act3", 0.5f * step);
-		montage->AddAnimCompositeSection("Act4", 0.8f * step);
-		montage->DeleteAnimCompositeSection(0);*/
-
-		//UAnimNotify_PlaySound* playSnd = CreateDefaultSubobject<UAnimNotify_PlaySound>(TEXT("playSnd"));
-	}
-}
-
-void AAttackCharacter::Play_TestMontage()
-{
-	if (TestMtg)
-	{
-		GetMesh()->GetAnimInstance()->Montage_Play(TestMtg);
-	}
-}
-
-void AAttackCharacter::OnOverlapBegin_Implementation(UPrimitiveComponent* Comp, 
-	AActor* otherActor, UPrimitiveComponent* otherComp, int otherBodyIndex, 
-	bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (Comp->GetCollisionObjectType() == HitBoxObjectChannel && otherComp->GetCollisionObjectType() == HitBoxObjectChannel &&
-		otherActor != this && HitBoxCPs.Contains(otherComp) == false)
-	{
-		UBoxComponent* HitBoxCom = Cast<UBoxComponent>(Comp);
-		int CompIndex = -1;
-		if (HitBoxCom && HitBoxCPs.Find(HitBoxCom, CompIndex))
-		{
-			if (HitBoxActives[CompIndex])
-			{
-				FString DisplayStr;
-				DisplayStr.Append(Comp->GetName()).Append(" Hit: ").Append(otherActor->GetName()).Append("|").Append(otherComp->GetName());
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("%s"), *DisplayStr));
-			}
-		}
-	}
-}
-
-void AAttackCharacter::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-
-	TArray<UActorComponent*> Comps = GetComponentsByClass(UBoxComponent::StaticClass());
-	for (int i = 0; i < Comps.Num(); ++i)
-	{
-		UBoxComponent* HitBox = Cast<UBoxComponent>(Comps[i]);
-		if (HitBox && HitBox->GetCollisionObjectType() == HitBoxObjectChannel)
-		{
-			HitBoxCPs.Add(HitBox);
-			HitBoxNames.Add(HitBox->GetName());
-		}
-	}
-	CancleAttackBoxs();
-
-	for (int i = 0; i < HitBoxCPs.Num(); ++i)
-	{
-		HitBoxCPs[i]->OnComponentBeginOverlap.AddDynamic(this, &AAttackCharacter::OnOverlapBegin);
-	}
-
-	int WeaponHitBoxIndex = -1;
-	if (HitBoxNames.Find("weapon", WeaponHitBoxIndex))
-	{
-		WeaponHitBox = HitBoxCPs[WeaponHitBoxIndex];
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, FString::Printf(TEXT("--WEAPON--")));
-	}
-}
-
 void AAttackCharacter::ActiveAttackBoxs(int PoseAttackIndex)
 {
+	bAttackBoxActiveFlag = true;
+	bHasAttackOne = false;
 	HitBoxActives.SetNum(HitBoxCPs.Num());
 	for (int i = 0; i < HitBoxActives.Num(); ++i)
 	{
@@ -223,6 +174,8 @@ void AAttackCharacter::ActiveAttackBoxs(int PoseAttackIndex)
 
 void AAttackCharacter::CancleAttackBoxs()
 {
+	bAttackBoxActiveFlag = false;
+	bHasAttackOne = false;
 	HitBoxActives.SetNum(HitBoxCPs.Num());
 	for (int i = 0; i < HitBoxActives.Num(); ++i)
 	{
@@ -230,37 +183,36 @@ void AAttackCharacter::CancleAttackBoxs()
 	}
 }
 
-void AAttackCharacter::WeaponTraceV1()
+void AAttackCharacter::AttackBoxesTrace()
 {
-	if (WeaponHitBox)
+	for (int i = 0; i < HitBoxActives.Num(); ++i)
 	{
-		FVector Start = WeaponHitBox->GetComponentLocation();
-		FVector Vel = Start - WeaponLastLocation;
-		FVector End = Start + Vel * 1.0f; // For Test
-		WeaponLastLocation = Start;
-
-		FVector HalfSize = WeaponHitBox->GetScaledBoxExtent();
-		FRotator Rotator = WeaponHitBox->GetComponentRotation();
-		TArray<FHitResult> HitResults;
-		TArray<AActor*> ActorsToIgonre;
-		ActorsToIgonre.Add(this);
-
-		if (UKismetSystemLibrary::BoxTraceMultiByProfile(
-			this, Start, End, HalfSize, Rotator, "HitBoxCheck", false, ActorsToIgonre, EDrawDebugTrace::ForOneFrame, HitResults, true, FLinearColor::Red, FLinearColor::Green, 0.05f))
+		if (HitBoxActives[i])
 		{
-			for (int i = 0; i < HitResults.Num(); ++i)
+			UBoxComponent* AttackBox = HitBoxCPs[i];
+			FHitResult HitResult;
+			
+			if (AttackBox)
 			{
-				FHitResult& Hit = HitResults[i];
+				FVector Start = AttackBox->GetComponentLocation();
+				FVector Vel = Start - HitBoxLastLocations[i];
+				FVector End = Start + Vel;
 
-				//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("BoxTrace: %s"), *(HitResults[0].ToString())));
-				DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 10.0f, 4, FColor::Blue);
+				FVector HalfSize = AttackBox->GetScaledBoxExtent();
+				FRotator Rotator = AttackBox->GetComponentRotation();
+				TArray<AActor*> ActorsToIgonre;
+				ActorsToIgonre.Add(this);
+
+				if (UKismetSystemLibrary::BoxTraceSingleByProfile(
+					this, Start, End, HalfSize, Rotator, "HitBoxCheck", false, ActorsToIgonre, EDrawDebugTrace::ForOneFrame,
+					HitResult, true, FLinearColor::Red, FLinearColor::Green, 0.05f))
+				{
+					GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%s Hit %s"), *AttackBox->GetName(), *HitResult.GetActor()->GetName()));
+					//DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 4, FColor::Blue);
+					bHasAttackOne = true;
+					return;
+				}
 			}
 		}
 	}
-}
-
-void AAttackCharacter::WeaponTraceV2()
-{
-	// 上面的方法要是不能精确获取，则通过12根射线去模拟；
-	// 然后获取击中位置的中心值；
 }
