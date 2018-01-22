@@ -210,6 +210,9 @@ void AAttackCharacter::AttackBoxesTrace()
 					GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%s Hit %s"), *AttackBox->GetName(), *HitResult.GetActor()->GetName()));
 					//DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 4, FColor::Blue);
 					bHasAttackOne = true;
+					
+					UGameplayStatics::ApplyPointDamage(HitResult.GetActor(), 10.0f, HitResult.ImpactNormal, HitResult, nullptr, this, nullptr);
+					
 					return;
 				}
 			}
