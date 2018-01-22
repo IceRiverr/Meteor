@@ -91,6 +91,48 @@ void AAttackCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("LookUp", this, &AAttackCharacter::LookUp);
 }
 
+float AAttackCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	FVector Forward = GetActorForwardVector();
+
+	FHitResult HitResult;
+	FVector ImpulseDir;
+	DamageEvent.GetBestHitInfo(this, DamageCauser, HitResult, ImpulseDir);
+	ImpulseDir.Normalize();
+
+	FVector ToHitPoint = HitResult.ImpactPoint - GetActorLocation();
+	ToHitPoint = FVector(ToHitPoint.X, ToHitPoint.Y, 0.0f);
+	ToHitPoint.Normalize();
+
+	float DotValue = FVector::DotProduct(Forward, ToHitPoint);
+	FVector CrossValue = FVector::CrossProduct(Forward, ToHitPoint);
+	float UpAngleDot = FVector::DotProduct(CrossValue, GetActorUpVector());
+	float LeftRightFactor = (UpAngleDot > 0.0f ? 1.0f : -1.0f) * CrossValue.Size();
+
+	if (DotValue > 0.707107)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, FString::Printf(TEXT("Hit by FWD")));
+	}
+	else if (DotValue < -0.707107)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, FString::Printf(TEXT("Hit by BWD")));
+	}
+	else if (LeftRightFactor > 0.707107)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, FString::Printf(TEXT("Hit by RIGHT")));
+	}
+	else if (LeftRightFactor < -0.707107)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, FString::Printf(TEXT("Hit by LEFT")));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, FString::Printf(TEXT("Hit by Undecide Direction")));
+	}
+
+	return Damage;
+}
+
 void AAttackCharacter::MoveForward(float Value)
 {
 	if (CombatSystemCP->GetMoveType() == MOVE_TYPE::MOVE_IDLE || CombatSystemCP->GetMoveType() == MOVE_TYPE::MOVE_JUMP)
