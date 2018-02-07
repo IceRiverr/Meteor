@@ -9,9 +9,9 @@
 #include "Engine/StreamableManager.h"
 
 #include "MeteorAnimMetaData.h"
-#include "Meteor/Common/MeteorDef.h"
-#include "Meteor/Common/MeteorActionState.h"
-#include "Meteor/Common/MeteorActionFactory.h"
+#include "Common/MeteorDef.h"
+#include "Common/MeteorActionState.h"
+#include "Common/MeteorActionFactory.h"
 #include "MeteorDataTable.h"
 
 #include "CombatSystemComponent.generated.h"

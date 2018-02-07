@@ -1,7 +1,7 @@
 // Copyright IceRiver. All Rights Reserved.
 
 #include "InputCommandComponent.h"
-#include "Meteor/Common/MeteorFuncLib.h"
+#include "MeteorFuncLib.h"
 #include "GameFramework/PlayerInput.h"
 #include "Engine.h"
 
@@ -10,6 +10,8 @@ using namespace Meteor;
 UInputCommandComponent::UInputCommandComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	bReplicates = true;
 
 	KeyCount = (int)Meteor::INPUT_KEY::KEY_OTHER;
 
@@ -95,7 +97,7 @@ void UInputCommandComponent::InitActionList()
 void UInputCommandComponent::GetKeyMapping()
 {
 	const APlayerController* PlayerControler = GetWorld()->GetFirstPlayerController();
-	if (PlayerControler)
+	if (PlayerControler && PlayerControler->PlayerInput)
 	{
 		for (int i = 0; i < KeyCount; ++i)
 		{

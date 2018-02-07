@@ -6,13 +6,15 @@
 #include "Animation/AnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-#include "Meteor/AttackCharacter.h"
-#include "Meteor/Components/InputCommandComponent.h"
+#include "AttackCharacter.h"
+#include "Components/InputCommandComponent.h"
 #include "Common/MeteorFuncLib.h"
 
 UCombatSystemComponent::UCombatSystemComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	bReplicates = true;
 
 	ActoinStateFactory = new FMeteorActionStateFactory();
 

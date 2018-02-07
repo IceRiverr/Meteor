@@ -9,7 +9,7 @@
 
 #include "MeteorDataTable.h"
 #include "MeteorAnimMetaData.h"
-#include "Meteor/Common/MeteorDef.h"
+#include "Common/MeteorDef.h"
 
 #include "AttackCharacter.generated.h"
 

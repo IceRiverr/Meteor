@@ -8,10 +8,10 @@
 #include "Components/BoxComponent.h"
 
 #include "Meteor.h"
-#include "Meteor/Common/MeteorFuncLib.h"
-#include "Meteor/Components/InputBufferComponent.h"
-#include "Meteor/Components/InputCommandComponent.h"
-#include "Meteor/Components/CombatSystemComponent.h"
+#include "Common/MeteorFuncLib.h"
+#include "Components/InputBufferComponent.h"
+#include "Components/InputCommandComponent.h"
+#include "Components/CombatSystemComponent.h"
 
 AAttackCharacter::AAttackCharacter()
 {

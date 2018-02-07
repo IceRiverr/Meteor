@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Meteor/Common/MeteorDef.h"
+#include "MeteorDef.h"
 
 class AAttackCharacter;
 class UInputCommandComponent;

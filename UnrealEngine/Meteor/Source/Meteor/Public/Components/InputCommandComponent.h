@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Engine/DataTable.h"
-#include "Meteor/Common/MeteorDef.h"
+#include "Common/MeteorDef.h"
 #include "Engine/StreamableManager.h"
 #include "MeteorDataTable.h"
 
