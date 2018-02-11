@@ -32,11 +32,13 @@ public:
 
 	void PlayAttack();
 
-	UFUNCTION(Server, Reliable, WithValidation)
+	UFUNCTION(reliable, server, WithValidation)
 	void SERVER_Attack(uint32 bAttack);
 	void SERVER_Attack_Implementation(uint32 bAttack);
 	bool SERVER_Attack_Validate(uint32 bAttack);
 
+	void OnMontageEnded(class UAnimMontage* Montage, bool bInterrupted);
+	
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
 	class UAnimMontage* DaoAttackMtg;

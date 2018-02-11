@@ -5,6 +5,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimInstance.h"
 #include "UnrealNetwork.h"
+#include "Engine/Engine.h"
 
 
 // Sets default values
@@ -26,14 +27,14 @@ void ANetCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ANetCharacter, bAttackFlag);
+	DOREPLIFETIME_CONDITION(ANetCharacter, bAttackFlag, COND_SkipOwner);
 }
 
 // Called when the game starts or when spawned
 void ANetCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -50,13 +51,18 @@ void ANetCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ANetCharacter::StartAttack);
 
-	PlayerInputComponent->BindAction("Attack", IE_Released, this, &ANetCharacter::StopAttack);
+	//PlayerInputComponent->BindAction("Attack", IE_Released, this, &ANetCharacter::StopAttack);
 }
 
 void ANetCharacter::StartAttack()
 {
+	if (Role < ROLE_Authority)
+	{
+		SERVER_Attack(true);
+	}
+
+	bAttackFlag = true;
 	PlayAttack();
-	SERVER_Attack(true);
 }
 
 void ANetCharacter::StopAttack()
@@ -72,22 +78,35 @@ void ANetCharacter::PlayAttack()
 		if (AnimInstance)
 		{
 			AnimInstance->Montage_Play(DaoAttackMtg);
+
+			if (Role == ROLE_Authority)
+			{
+				FOnMontageEnded MontageEndedDelegate;
+				MontageEndedDelegate.BindUObject(this, &ANetCharacter::OnMontageEnded);
+				AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, DaoAttackMtg);
+			}
 		}
 	}
 }
 
 void ANetCharacter::SERVER_Attack_Implementation(uint32 bAttack)
 {
-	bAttackFlag = bAttack;
-	if (Role == ROLE_Authority)
-	{
-		OnRep_SetAttackFlag();
-	}
+	StartAttack();
 }
 
 bool ANetCharacter::SERVER_Attack_Validate(uint32 bAttack)
 {
 	return true;
+}
+
+void ANetCharacter::OnMontageEnded(class UAnimMontage* Montage, bool bInterrupted)
+{
+	GEngine->AddOnScreenDebugMessage(0, 1, FColor::Green, TEXT("OnMontageEnded..."));
+
+	if (Role == ROLE_Authority)
+	{
+		bAttackFlag = false;
+	}
 }
 
 void ANetCharacter::OnRep_SetAttackFlag()

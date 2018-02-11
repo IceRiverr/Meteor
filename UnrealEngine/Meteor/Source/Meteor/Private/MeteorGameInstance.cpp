@@ -15,7 +15,8 @@ void UMeteorGameInstance::Host()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		World->ServerTravel("/Game/Test/AttackTest/SN05_2?listen");
+		//World->ServerTravel("/Game/Test/AttackTest/SN05_2?listen");
+		World->ServerTravel("/Game/Online/NetTest?listen");
 	}
 }
 
